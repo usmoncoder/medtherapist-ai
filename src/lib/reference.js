@@ -1,0 +1,205 @@
+// Statik ma'lumotnoma — uch tilda. Kontent klinik yo'naltiruvchi xarakterga ega.
+
+const PROTOCOLS = {
+  uz: [
+    { title: "Arterial gipertenziya — boshqaruv", tag: "Kardiologiya",
+      text: "AD ≥140/90 bo'lganda tashxis va bosqichma-bosqich davolash tartibi.",
+      list: ["AD ni 2 xil vaqtda, 2 marta o'lchash",
+             "Nishon a'zolar zararlanishini baholash: EKG, kreatinin, siydik oqsili",
+             "Boshlang'ich davo: turmush tarzini o'zgartirish + monoterapiya",
+             "Nazorat: 2–4 haftada takroriy ko'rik"] },
+    { title: "2-tip qandli diabet — skrining", tag: "Endokrinologiya",
+      text: "Xavf guruhini aniqlash, HbA1c va glikemiya bo'yicha tartib.",
+      list: ["45 yoshdan oshganlarda har 3 yilda skrining",
+             "HbA1c ≥6.5% — tashxis mezoni",
+             "Nefropatiya va retinopatiya skriningi yiliga 1 marta"] },
+    { title: "O'tkir respirator infeksiya", tag: "Pulmonologiya",
+      text: "ARVI da antibiotik tayinlash mezonlari va simptomatik davo.",
+      list: ["Virusli etiologiyada antibiotik ko'rsatilmagan",
+             "Isitma 5 kundan ortiq — qayta ko'rik",
+             "Alarm belgilar: hansirash, ko'krak og'rig'i, SpO₂ <94%"] },
+    { title: "Temir tanqisligi anemiyasi", tag: "Gematologiya",
+      text: "Ferritin, temir preparatlari va nazorat muddatlari.",
+      list: ["Ferritin <30 ng/ml — temir tanqisligi",
+             "Peroral temir: 100–200 mg/kun",
+             "Hb nazorati 4 haftadan keyin"] },
+    { title: "Surunkali gastrit va H. pylori", tag: "Gastroenterologiya",
+      text: "Eradikatsiya sxemasi va FGDS ko'rsatmalari.",
+      list: ["Nafas testi yoki najas antigeni bilan tekshirish",
+             "Uch komponentli eradikatsiya 14 kun",
+             "Nazorat testi davodan 4 hafta keyin"] },
+    { title: "Migren — o'tkir xuruj", tag: "Nevrologiya",
+      text: "Xurujni bartaraf etish va profilaktika tartibi.",
+      list: ["NSAID birinchi qatorda",
+             "Oyiga 4 dan ortiq xuruj — profilaktika",
+             "Qizil bayroqlar: to'satdan kuchli og'riq, nevrologik defitsit"] },
+  ],
+  uzc: [
+    { title: "Артериал гипертензия — бошқарув", tag: "Кардиология",
+      text: "АД ≥140/90 бўлганда ташхис ва босқичма-босқич даволаш тартиби.",
+      list: ["АД ни 2 хил вақтда, 2 марта ўлчаш",
+             "Нишон аъзолар зарарланишини баҳолаш: ЭКГ, креатинин, сийдик оқсили",
+             "Бошланғич даво: турмуш тарзини ўзгартириш + монотерапия",
+             "Назорат: 2–4 ҳафтада такрорий кўрик"] },
+    { title: "2-тип қандли диабет — скрининг", tag: "Эндокринология",
+      text: "Хавф гуруҳини аниқлаш, HbA1c ва гликемия бўйича тартиб.",
+      list: ["45 ёшдан ошганларда ҳар 3 йилда скрининг",
+             "HbA1c ≥6.5% — ташхис мезони",
+             "Нефропатия ва ретинопатия скрининги йилига 1 марта"] },
+    { title: "Ўткир респиратор инфекция", tag: "Пульмонология",
+      text: "ОРВИ да антибиотик тайинлаш мезонлари ва симптоматик даво.",
+      list: ["Вирусли этиологияда антибиотик кўрсатилмаган",
+             "Иситма 5 кундан ортиқ — қайта кўрик",
+             "Аларм белгилар: ҳансираш, кўкрак оғриғи, SpO₂ <94%"] },
+    { title: "Темир танқислиги анемияси", tag: "Гематология",
+      text: "Ферритин, темир препаратлари ва назорат муддатлари.",
+      list: ["Ферритин <30 нг/мл — темир танқислиги",
+             "Перорал темир: 100–200 мг/кун",
+             "Hb назорати 4 ҳафтадан кейин"] },
+    { title: "Сурункали гастрит ва H. pylori", tag: "Гастроэнтерология",
+      text: "Эрадикация схемаси ва ФГДС кўрсатмалари.",
+      list: ["Нафас тести ёки нажас антигени билан текшириш",
+             "Уч компонентли эрадикация 14 кун",
+             "Назорат тести даводан 4 ҳафта кейин"] },
+    { title: "Мигрень — ўткир хуруж", tag: "Неврология",
+      text: "Хуружни бартараф этиш ва профилактика тартиби.",
+      list: ["НПВП биринчи қаторда",
+             "Ойига 4 дан ортиқ хуруж — профилактика",
+             "Қизил байроқлар: тўсатдан кучли оғриқ, неврологик дефицит"] },
+  ],
+  ru: [
+    { title: "Артериальная гипертензия — ведение", tag: "Кардиология",
+      text: "Диагностика при АД ≥140/90 и пошаговая тактика лечения.",
+      list: ["Измерить АД дважды в разное время",
+             "Оценить поражение органов-мишеней: ЭКГ, креатинин, белок в моче",
+             "Начальная терапия: изменение образа жизни + монотерапия",
+             "Контроль: повторный осмотр через 2–4 недели"] },
+    { title: "Сахарный диабет 2 типа — скрининг", tag: "Эндокринология",
+      text: "Выявление группы риска, тактика по HbA1c и гликемии.",
+      list: ["Скрининг каждые 3 года после 45 лет",
+             "HbA1c ≥6.5% — критерий диагноза",
+             "Скрининг нефропатии и ретинопатии 1 раз в год"] },
+    { title: "Острая респираторная инфекция", tag: "Пульмонология",
+      text: "Критерии назначения антибиотиков при ОРВИ и симптоматическая терапия.",
+      list: ["При вирусной этиологии антибиотики не показаны",
+             "Лихорадка более 5 дней — повторный осмотр",
+             "Тревожные признаки: одышка, боль в груди, SpO₂ <94%"] },
+    { title: "Железодефицитная анемия", tag: "Гематология",
+      text: "Ферритин, препараты железа и сроки контроля.",
+      list: ["Ферритин <30 нг/мл — дефицит железа",
+             "Пероральное железо: 100–200 мг/сут",
+             "Контроль Hb через 4 недели"] },
+    { title: "Хронический гастрит и H. pylori", tag: "Гастроэнтерология",
+      text: "Схема эрадикации и показания к ФГДС.",
+      list: ["Дыхательный тест или антиген в кале",
+             "Трёхкомпонентная эрадикация 14 дней",
+             "Контрольный тест через 4 недели после лечения"] },
+    { title: "Мигрень — острый приступ", tag: "Неврология",
+      text: "Купирование приступа и профилактика.",
+      list: ["НПВП в первой линии",
+             "Более 4 приступов в месяц — профилактика",
+             "Красные флаги: внезапная сильная боль, неврологический дефицит"] },
+  ],
+};
+
+const DRUGS = {
+  uz: [
+    { n: "Amlodipin", g: "Kalsiy kanali blokatori", d: "5–10 mg / kunda 1 marta", i: "Arterial gipertenziya, stenokardiya", s: "Oyoq shishi, bosh og'rig'i, yuz qizarishi", c: "Og'ir aortal stenoz, kardiogen shok" },
+    { n: "Lizinopril", g: "AAF ingibitori", d: "10–20 mg / kunda 1 marta", i: "AG, yurak yetishmovchiligi", s: "Quruq yo'tal, giperkaliemiya", c: "Homiladorlik, angionevrotik shish anamnezi" },
+    { n: "Metformin", g: "Biguanid", d: "500–2000 mg / kunda 2 marta", i: "2-tip qandli diabet", s: "Ko'ngil aynishi, diareya", c: "GFR <30 ml/min, o'tkir atsidoz" },
+    { n: "Omeprazol", g: "Proton nasosi ingibitori", d: "20–40 mg / kunda 1 marta", i: "Gastrit, GERD, yara kasalligi", s: "Bosh og'rig'i, meteorizm", c: "Preparatga sezuvchanlik" },
+    { n: "Ibuprofen", g: "NSAID", d: "200–400 mg / 6–8 soatda", i: "Og'riq, isitma, yallig'lanish", s: "Epigastral og'riq, dispepsiya", c: "Oshqozon yarasi, og'ir buyrak yetishmovchiligi" },
+    { n: "Temir sulfat", g: "Temir preparati", d: "100–200 mg elementar temir / kun", i: "Temir tanqisligi anemiyasi", s: "Qabziyat, najas qorayishi", c: "Gemoxromatoz" },
+    { n: "Amoksitsillin", g: "Penitsillin qatori antibiotik", d: "500 mg / kuniga 3 marta", i: "Bakterial infeksiyalar", s: "Toshma, diareya", c: "Penitsillinga allergiya" },
+    { n: "Salbutamol", g: "Qisqa ta'sirli β2-agonist", d: "100–200 mkg ingalyatsiya", i: "Bronxospazm, bronxial astma", s: "Tremor, taxikardiya", c: "Preparatga sezuvchanlik" },
+  ],
+  uzc: [
+    { n: "Амлодипин", g: "Кальций канали блокатори", d: "5–10 мг / кунда 1 марта", i: "Артериал гипертензия, стенокардия", s: "Оёқ шиши, бош оғриғи, юз қизариши", c: "Оғир аортал стеноз, кардиоген шок" },
+    { n: "Лизиноприл", g: "ААФ ингибитори", d: "10–20 мг / кунда 1 марта", i: "АГ, юрак етишмовчилиги", s: "Қуруқ йўтал, гиперкалиемия", c: "Ҳомиладорлик, ангионевротик шиш анамнези" },
+    { n: "Метформин", g: "Бигуанид", d: "500–2000 мг / кунда 2 марта", i: "2-тип қандли диабет", s: "Кўнгил айниши, диарея", c: "GFR <30 мл/мин, ўткир ацидоз" },
+    { n: "Омепразол", g: "Протон насоси ингибитори", d: "20–40 мг / кунда 1 марта", i: "Гастрит, ГЭРБ, яра касаллиги", s: "Бош оғриғи, метеоризм", c: "Препаратга сезувчанлик" },
+    { n: "Ибупрофен", g: "НПВП", d: "200–400 мг / 6–8 соатда", i: "Оғриқ, иситма, яллиғланиш", s: "Эпигастрал оғриқ, диспепсия", c: "Ошқозон яраси, оғир буйрак етишмовчилиги" },
+    { n: "Темир сульфат", g: "Темир препарати", d: "100–200 мг элементар темир / кун", i: "Темир танқислиги анемияси", s: "Қабзият, нажас қорайиши", c: "Гемохроматоз" },
+    { n: "Амоксициллин", g: "Пенициллин қатори антибиотик", d: "500 мг / кунига 3 марта", i: "Бактериал инфекциялар", s: "Тошма, диарея", c: "Пенициллинга аллергия" },
+    { n: "Салбутамол", g: "Қисқа таъсирли β2-агонист", d: "100–200 мкг ингаляция", i: "Бронхоспазм, бронхиал астма", s: "Тремор, тахикардия", c: "Препаратга сезувчанлик" },
+  ],
+  ru: [
+    { n: "Амлодипин", g: "Блокатор кальциевых каналов", d: "5–10 мг / 1 раз в сутки", i: "Артериальная гипертензия, стенокардия", s: "Отёки ног, головная боль, покраснение лица", c: "Тяжёлый аортальный стеноз, кардиогенный шок" },
+    { n: "Лизиноприл", g: "Ингибитор АПФ", d: "10–20 мг / 1 раз в сутки", i: "АГ, сердечная недостаточность", s: "Сухой кашель, гиперкалиемия", c: "Беременность, ангионевротический отёк в анамнезе" },
+    { n: "Метформин", g: "Бигуанид", d: "500–2000 мг / 2 раза в сутки", i: "Сахарный диабет 2 типа", s: "Тошнота, диарея", c: "СКФ <30 мл/мин, острый ацидоз" },
+    { n: "Омепразол", g: "Ингибитор протонной помпы", d: "20–40 мг / 1 раз в сутки", i: "Гастрит, ГЭРБ, язвенная болезнь", s: "Головная боль, метеоризм", c: "Гиперчувствительность к препарату" },
+    { n: "Ибупрофен", g: "НПВП", d: "200–400 мг / каждые 6–8 часов", i: "Боль, лихорадка, воспаление", s: "Боль в эпигастрии, диспепсия", c: "Язва желудка, тяжёлая почечная недостаточность" },
+    { n: "Сульфат железа", g: "Препарат железа", d: "100–200 мг элементарного железа / сут", i: "Железодефицитная анемия", s: "Запор, потемнение стула", c: "Гемохроматоз" },
+    { n: "Амоксициллин", g: "Антибиотик пенициллинового ряда", d: "500 мг / 3 раза в сутки", i: "Бактериальные инфекции", s: "Сыпь, диарея", c: "Аллергия на пенициллины" },
+    { n: "Сальбутамол", g: "β2-агонист короткого действия", d: "100–200 мкг ингаляционно", i: "Бронхоспазм, бронхиальная астма", s: "Тремор, тахикардия", c: "Гиперчувствительность к препарату" },
+  ],
+};
+
+const FAQ_PATIENT = {
+  uz: [
+    { title: "Shifokorni qanday tanlayman?", text: "«Mening shifokorim» bo'limiga kiring, ro'yxatdan mos shifokorni tanlab «Biriktirish» tugmasini bosing. Shundan keyin u bilan chat avtomatik ochiladi." },
+    { title: "Navbatni qanday olaman?", text: "«Navbat olish» bo'limida sana, vaqt va murojaat sababini yozing. So'rov shifokorga «kutilmoqda» holatida boradi — u tasdiqlagach sizga ko'rinadi." },
+    { title: "Analizlarimni qayerga yozaman?", text: "«Analizlarim» bo'limida analiz nomi, natija, o'lchov birligi va sanani kiritasiz. Shifokoringiz ularni ko'radi va izoh yozishi mumkin." },
+    { title: "Yozishmalarim maxfiymi?", text: "Ha. Har bir suhbat faqat siz va shifokoringizga ko'rinadi — boshqa bemor yoki shifokor uni ocholmaydi." },
+    { title: "Tilni va rejimni qanday almashtiraman?", text: "Yuqori panelda til tugmasi va oy/quyosh belgisi bor. Tanlovingiz brauzeringizda saqlanadi." },
+  ],
+  uzc: [
+    { title: "Шифокорни қандай танлайман?", text: "«Менинг шифокорим» бўлимига киринг, рўйхатдан мос шифокорни танлаб «Бириктириш» тугмасини босинг. Шундан кейин у билан чат автоматик очилади." },
+    { title: "Навбатни қандай оламан?", text: "«Навбат олиш» бўлимида сана, вақт ва мурожаат сабабини ёзинг. Сўров шифокорга «кутилмоқда» ҳолатида боради — у тасдиқлагач сизга кўринади." },
+    { title: "Анализларимни қаерга ёзаман?", text: "«Анализларим» бўлимида анализ номи, натижа, ўлчов бирлиги ва санани киритасиз. Шифокорингиз уларни кўради ва изоҳ ёзиши мумкин." },
+    { title: "Ёзишмаларим махфийми?", text: "Ҳа. Ҳар бир суҳбат фақат сиз ва шифокорингизга кўринади — бошқа бемор ёки шифокор уни очолмайди." },
+    { title: "Тилни ва режимни қандай алмаштираман?", text: "Юқори панелда тил тугмаси ва ой/қуёш белгиси бор. Танловингиз браузерингизда сақланади." },
+  ],
+  ru: [
+    { title: "Как выбрать врача?", text: "Откройте раздел «Мой врач», выберите подходящего специалиста и нажмите «Прикрепиться». После этого чат с ним откроется автоматически." },
+    { title: "Как записаться на приём?", text: "В разделе «Запись на приём» укажите дату, время и причину обращения. Заявка уйдёт врачу со статусом «ожидает» — после подтверждения она станет активной." },
+    { title: "Куда вносить анализы?", text: "В разделе «Мои анализы» укажите название, результат, единицу измерения и дату. Ваш врач увидит их и сможет оставить комментарий." },
+    { title: "Моя переписка конфиденциальна?", text: "Да. Каждый чат виден только вам и вашему врачу — другой пациент или врач его открыть не сможет." },
+    { title: "Как сменить язык и тему?", text: "В верхней панели есть переключатель языка и значок луны/солнца. Ваш выбор сохраняется в браузере." },
+  ],
+};
+
+const FAQ_DOCTOR = {
+  uz: [
+    { title: "Bemorlar ro'yxatiga kim tushadi?", text: "Sizga biriktirilgan bemorlar va siz bilan suhbat ochgan bemorlar. Boshqa shifokorning bemorlari ko'rinmaydi." },
+    { title: "Navbatni qanday tasdiqlayman?", text: "«Navbatlar» bo'limida «kutilmoqda» holatidagi so'rovni oching va «Tasdiqlash» yoki «Rad etish» tugmasini bosing. Bemor holatni darhol ko'radi." },
+    { title: "AI tahlil qanday ishlaydi?", text: "Bemor tanlanadi, shikoyat va ko'rsatkichlar kiritiladi. Ma'lumot bemor profili va analizlari bilan birga Gemini modeliga yuboriladi va differensial tashxis, tekshiruv hamda boshqaruv rejasi qaytadi." },
+    { title: "AI natijasiga qanchalik ishonish mumkin?", text: "AI faqat yo'naltiruvchi vosita. Yakuniy klinik qaror har doim shifokorniki bo'lib qoladi." },
+    { title: "Bir vaqtga ikki bemorni yozib bo'ladimi?", text: "Yo'q. Tasdiqlashda tizim vaqt bandligini tekshiradi va to'qnashuv bo'lsa ogohlantiradi." },
+  ],
+  uzc: [
+    { title: "Беморлар рўйхатига ким тушади?", text: "Сизга бириктирилган беморлар ва сиз билан суҳбат очган беморлар. Бошқа шифокорнинг беморлари кўринмайди." },
+    { title: "Навбатни қандай тасдиқлайман?", text: "«Навбатлар» бўлимида «кутилмоқда» ҳолатидаги сўровни очинг ва «Тасдиқлаш» ёки «Рад этиш» тугмасини босинг. Бемор ҳолатни дарҳол кўради." },
+    { title: "AI таҳлил қандай ишлайди?", text: "Бемор танланади, шикоят ва кўрсаткичлар киритилади. Маълумот бемор профили ва анализлари билан бирга Gemini моделига юборилади ва дифференциал ташхис, текширув ҳамда бошқарув режаси қайтади." },
+    { title: "AI натижасига қанчалик ишониш мумкин?", text: "AI фақат йўналтирувчи восита. Якуний клиник қарор ҳар доим шифокорники бўлиб қолади." },
+    { title: "Бир вақтга икки беморни ёзиб бўладими?", text: "Йўқ. Тасдиқлашда тизим вақт бандлигини текширади ва тўқнашув бўлса огоҳлантиради." },
+  ],
+  ru: [
+    { title: "Кто попадает в список пациентов?", text: "Прикреплённые к вам пациенты и те, кто начал с вами чат. Пациенты другого врача не видны." },
+    { title: "Как подтвердить запись?", text: "В разделе «Записи» откройте заявку со статусом «ожидает» и нажмите «Подтвердить» или «Отклонить». Пациент увидит статус сразу." },
+    { title: "Как работает AI-анализ?", text: "Выбирается пациент, вводятся жалобы и показатели. Данные вместе с профилем и анализами пациента уходят в модель Gemini, которая возвращает дифференциальный диагноз, план обследования и ведения." },
+    { title: "Насколько можно доверять результату AI?", text: "AI — только ориентирующий инструмент. Окончательное клиническое решение всегда остаётся за врачом." },
+    { title: "Можно ли записать двух пациентов на одно время?", text: "Нет. При подтверждении система проверяет занятость времени и предупреждает о конфликте." },
+  ],
+};
+
+const SYMPTOMS = {
+  uz: ["Bosh og'rig'i", "Isitma", "Yo'tal", "Hansirash", "Ko'ngil aynishi", "Holsizlik", "Yurak tez urishi", "Bosh aylanishi"],
+  uzc: ["Бош оғриғи", "Иситма", "Йўтал", "Ҳансираш", "Кўнгил айниши", "Ҳолсизлик", "Юрак тез уриши", "Бош айланиши"],
+  ru: ["Головная боль", "Лихорадка", "Кашель", "Одышка", "Тошнота", "Слабость", "Учащённое сердцебиение", "Головокружение"],
+};
+
+// Allergiya chiplari — qiymat bazaga saqlanadi, shuning uchun value o'zgarmas (uz)
+const ALLERGY_CHIPS = {
+  uz: [["Yo'q", "Yo'q"], ["Penitsillin", "Penitsillin"], ["Chang", "Chang"], ["Laktoza", "Laktoza"], ["Oziq-ovqat", "Oziq-ovqat"]],
+  uzc: [["Yo'q", "Йўқ"], ["Penitsillin", "Пенициллин"], ["Chang", "Чанг"], ["Laktoza", "Лактоза"], ["Oziq-ovqat", "Озиқ-овқат"]],
+  ru: [["Yo'q", "Нет"], ["Penitsillin", "Пенициллин"], ["Chang", "Пыль"], ["Laktoza", "Лактоза"], ["Oziq-ovqat", "Пищевая"]],
+};
+
+const pick = (map, lang) => map[lang] || map.uz;
+
+export const getProtocols = (lang) => pick(PROTOCOLS, lang);
+export const getDrugs = (lang) => pick(DRUGS, lang);
+export const getFaq = (lang, role) => pick(role === "doctor" ? FAQ_DOCTOR : FAQ_PATIENT, lang);
+export const getSymptoms = (lang) => pick(SYMPTOMS, lang);
+export const getAllergyChips = (lang) => pick(ALLERGY_CHIPS, lang);

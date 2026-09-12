@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mongo:
+        image: mongo:7
+        ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1}).ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      MONGODB_URI: mongodb://127.0.0.1:27017/medtherapist_ci
+      JWT_SECRET: ci-uchun-uzun-va-tasodifiy-maxfiy-kalit-32+
+      ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      COOKIE_SECURE: "false"
+      NODE_ENV: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Paketlarni o'rnatish
+        run: npm ci
+
+      - name: Zaifliklarni tekshirish
+        run: npm audit --audit-level=high
+
+      - name: Tarjima kalitlari to'liqligi
+        run: node scripts/check-i18n.mjs
+
+      - name: Yig'ish (build)
+        run: npm run build
+
+      - name: Serverni ishga tushirish
+        run: |
+          node server.js > /tmp/server.log 2>&1 &
+          echo $! > /tmp/server.pid
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then
+              echo "server tayyor"; exit 0
+            fi
+            sleep 2
+          done
+          echo "server ishga tushmadi"; cat /tmp/server.log; exit 1
+
+      - name: Demo ma'lumotlarni yuklash
+        run: node scripts/seed.js
+
+      - name: Uchidan-uchiga testlar
+        run: node scripts/smoke-test.mjs
+
+      - name: Server logini ko'rsatish (xato bo'lsa)
+        if: failure()
+        run: tail -100 /tmp/server.log
+
+      - name: Serverni to'xtatish
+        if: always()
+        run: kill "$(cat /tmp/server.pid)" || true
