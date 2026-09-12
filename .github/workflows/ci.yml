@@ -34,7 +34,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Paketlarni o'rnatish
@@ -49,9 +49,11 @@ jobs:
       - name: Yig'ish (build)
         run: npm run build
 
+      # Production'dagidek `npm start` bilan — .env fayli yo'q muhitda ham ishga tushishi
+      # tekshiriladi (Railway kabi platformalarda o'zgaruvchilar faqat sozlamalardan keladi)
       - name: Serverni ishga tushirish
         run: |
-          node server.js > /tmp/server.log 2>&1 &
+          npm start > /tmp/server.log 2>&1 &
           echo $! > /tmp/server.pid
           for i in $(seq 1 60); do
             if curl -sf http://localhost:3000/api/health > /dev/null; then
@@ -62,10 +64,10 @@ jobs:
           echo "server ishga tushmadi"; cat /tmp/server.log; exit 1
 
       - name: Demo ma'lumotlarni yuklash
-        run: node scripts/seed.js
+        run: npm run seed
 
       - name: Uchidan-uchiga testlar
-        run: node scripts/smoke-test.mjs
+        run: npm run test:smoke
 
       - name: Server logini ko'rsatish (xato bo'lsa)
         if: failure()

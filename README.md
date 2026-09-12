@@ -45,6 +45,44 @@ Demo hisoblar (parol `Parol12345`):
 | `npm run keygen` | `ENCRYPTION_KEY` uchun tasodifiy kalit chiqaradi |
 
 Salomatlik tekshiruvi: `GET /api/health` → `{status, db, ai, uptimeSec}`
+
+Talab: **Node.js 22.9+**. Skriptlar `.env` faylni bo'lsa o'qiydi (`--env-file-if-exists`),
+bo'lmasa o'zgaruvchilarni muhitdan oladi — shuning uchun serverda `.env` shart emas.
+
+## Railway'ga joylash
+
+Loyiha **bitta servis** sifatida joylanadi: `server.js` sahifalar (frontend), `/api`
+(backend) va `/socket.io` (chat) ni bitta portda ishlatadi. Frontendni alohida joylash
+kerak emas. Baza MongoDB Atlas'da qoladi.
+
+> Vercel mos emas: u doimiy serverni qo'llamaydi — real vaqtli chat, fayl yuklash
+> (diskka yoziladi) va navbat eslatmalari (`setInterval`) u yerda ishlamaydi.
+
+1. [railway.com](https://railway.com) → **New Project → Deploy from GitHub repo** →
+   `usmoncoder/medtherapist-ai`. Build (`npm run build`) va start (`npm start`)
+   buyruqlarini Railway `package.json` dan o'zi aniqlaydi.
+2. **Variables** bo'limiga kiriting:
+
+   | O'zgaruvchi | Qiymat |
+   |---|---|
+   | `MONGODB_URI` | Atlas ulanish satri |
+   | `JWT_SECRET` | ≥32 belgili tasodifiy satr |
+   | `ENCRYPTION_KEY` | **lokal `.env` dagi bilan aynan bir xil** — aks holda shifrlangan bemor ma'lumotlari ochilmaydi |
+   | `GEMINI_API_KEY` | ixtiyoriy (AI uchun) |
+   | `NEXT_PUBLIC_APP_URL` | Railway bergan domen, masalan `https://….up.railway.app` |
+   | `UPLOAD_DIR` | `/data/uploads` (3-qadamdagi volume) |
+
+   `PORT` va `COOKIE_SECURE` ni **qo'ymang** — port Railway'dan keladi, production'da
+   cookie avtomatik `Secure`.
+3. **Volume** qo'shing, mount path: `/data/uploads` — aks holda har qayta joylashda
+   yuklangan fayllar o'chadi.
+4. **Settings → Networking → Generate Domain**; **Healthcheck path**: `/api/health`.
+5. **MongoDB Atlas → Network Access**: Railway IP'lari o'zgaruvchan, shuning uchun
+   `0.0.0.0/0` qo'shiladi — baza foydalanuvchisi paroli kuchli bo'lishi shart.
+
+**Xavfsizlik:** `npm run seed` demo hisoblarni `Parol12345` paroli bilan yaratadi —
+haqiqiy klinikada ishlatishdan oldin bu hisoblarning parollarini almashtiring yoki ularni
+bloklang.
 Uzluksiz integratsiya: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) —
 mongo:7 xizmati, `npm audit`, i18n tekshiruvi, build, seed va 147 ta smoke test.
 

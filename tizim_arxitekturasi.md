@@ -21,7 +21,7 @@ jurnalini to'liq ko'radi.
 
 | Qatlam | Texnologiya | Izoh |
 |---|---|---|
-| Runtime | Node.js 20+ | `server.js` — maxsus HTTP server |
+| Runtime | Node.js 22.9+ | `server.js` — maxsus HTTP server (`--env-file-if-exists` uchun 22.9+ kerak) |
 | Framework | Next.js 15 (App Router) | Frontend + Backend bitta loyihada |
 | UI | React 19 | Client komponentlar + uchta server sahifa |
 | Uslub | Sof CSS (`globals.css`) | CSS o'zgaruvchilariga asoslangan dizayn tizimi |
