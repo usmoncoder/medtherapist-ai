@@ -36,7 +36,7 @@ Demo hisoblar (parol `Parol12345`):
 | `npm run dev` | Ishlab chiqish serveri (Next.js + Socket.io bitta portda) |
 | `npm run build` / `npm start` | Ishlab chiqarish uchun yig'ish va ishga tushirish |
 | `npm run seed` | Bazani demo ma'lumotlar bilan to'ldirish |
-| `npm run test:smoke` | 145 ta uchidan-uchiga avtotest (server ishlab turishi kerak) |
+| `npm run test:smoke` | 147 ta uchidan-uchiga avtotest (server ishlab turishi kerak) |
 | `npm run test:smoke:ai` | Yuqoridagilar + haqiqiy Gemini so'rovi |
 | `npm run check:i18n` | Uch tilda tarjima kalitlari to'liqligini tekshiradi |
 | `npm test` | `check:i18n` + `build` (CI ning qisqa varianti) |
@@ -46,7 +46,7 @@ Demo hisoblar (parol `Parol12345`):
 
 Salomatlik tekshiruvi: `GET /api/health` → `{status, db, ai, uptimeSec}`
 Uzluksiz integratsiya: [`.github/workflows/ci.yml`](.github/workflows/ci.yml) —
-mongo:7 xizmati, `npm audit`, i18n tekshiruvi, build, seed va 145 ta smoke test.
+mongo:7 xizmati, `npm audit`, i18n tekshiruvi, build, seed va 147 ta smoke test.
 
 ## Rollar
 
@@ -119,7 +119,8 @@ Shikoyat va anamnez bazada **AES-256-GCM bilan shifrlangan** holda saqlanadi.
 - Yaroqsiz sessiya cookie'si tozalanadi (`/api/auth/expired`) — qayta yo'naltirish halqasi yo'q
 - **Maydon darajasidagi shifrlash** (AES-256-GCM): bemor shikoyati va anamnezi
 - Rol + obyekt egaligi tekshiruvi: ID ni taxmin qilib begona ma'lumotga kirib bo'lmaydi
-- Rate limiting: login 10/10daq, register 5/10daq, forgot 5/15daq, 2FA 10/10daq,
+- Rate limiting: login 10/10daq **hisob bo'yicha** + 60/10daq IP bo'yicha (bitta NAT ortidagi
+  klinika xodimlari bir-birini bloklamaydi), register 5/10daq, forgot 5/15daq, 2FA 10/10daq,
   navbat 20/soat, xabar 60/daq, fayl 40/soat, AI 30/soat
 - Fayllar: faqat JPG/PNG/WEBP/HEIC/PDF/TXT, ≤10 MB, tasodifiy nom, ruxsat tekshiruvi
 - Xavfsizlik sarlavhalari + HSTS (prod), API javoblari `no-store`

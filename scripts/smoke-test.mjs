@@ -553,6 +553,17 @@ async function main() {
   check("shifokor shifrni ochib ko'radi", 200, medRead.status);
   check("  matn o'qiladi", false, String(medRead.data?.patient?.profile?.complaint || "").startsWith("enc:v1:"));
 
+  section("Kirish cheklovi — hisob bo'yicha");
+  // Mavjud bo'lmagan hisobga 11 marta noto'g'ri urinish: 11-chisi bloklanadi.
+  // Boshqa hisoblar (bir xil IP'dan) bunga qaramay kira olishi kerak —
+  // klinika xodimlari bitta NAT IP ortida ishlaganda bir-birini bloklamasin.
+  const brute = session("brute");
+  const target = `limit${Date.now()}@example.uz`;
+  let last;
+  for (let i = 0; i < 11; i++) last = await login(brute, target, "NotogriParol1");
+  check("11-urinish bloklandi", 429, last.status);
+  check("  boshqa hisob kira oladi", 200, (await login(session("other"), "dilnoza@test.uz")).status);
+
   section("Xavfsizlik sarlavhalari");
   const page = await anon.req("/login");
   check("X-Content-Type-Options", "nosniff", page.headers.get("x-content-type-options"));

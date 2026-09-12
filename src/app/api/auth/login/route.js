@@ -10,11 +10,21 @@ import { audit, ACTIONS } from "@/lib/audit";
 
 export const POST = route(
   async ({ req }) => {
-    const ip = clientIp(req);
-    if (!(await rateLimitAsync(`login:${ip}`, { limit: 10, windowMs: 10 * 60_000 })).allowed)
-      throw new ApiError("RATE_LIMITED");
-
     const { email, password } = await body(req, loginSchema);
+
+    // Ikki qatlamli cheklov (bcrypt'dan oldin):
+    //  - hisob bo'yicha 10/10daq — bitta hisobga parol tanlashga qarshi;
+    //  - IP bo'yicha 60/10daq — ko'p hisobni ketma-ket sinashga qarshi.
+    // Faqat IP bo'yicha cheklash yetarli emas: klinika xodimlari bitta NAT IP ortida
+    // bo'lsa (yoki proksi X-Forwarded-For bermasa, hamma "local"), 10 ta kirishdan
+    // keyin butun klinika bloklanib qolardi.
+    const ip = clientIp(req);
+    const win = 10 * 60_000;
+    const [perIp, perAccount] = await Promise.all([
+      rateLimitAsync(`login:ip:${ip}`, { limit: 60, windowMs: win }),
+      rateLimitAsync(`login:acct:${ip}:${email}`, { limit: 10, windowMs: win }),
+    ]);
+    if (!perIp.allowed || !perAccount.allowed) throw new ApiError("RATE_LIMITED");
     const user = await User.findOne({ email });
 
     // Bir xil xabar — qaysi email mavjudligini oshkor qilmaymiz

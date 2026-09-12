@@ -102,7 +102,7 @@ medtherapist/
 │
 ├── scripts/
 │   ├── seed.js                ⚙️  Demo ma'lumotlar (4 rol, 3 shifokor, jadvallar)
-│   ├── smoke-test.mjs         ⚙️  Uchidan-uchiga avtotest (145 ta tekshiruv)
+│   ├── smoke-test.mjs         ⚙️  Uchidan-uchiga avtotest (147 ta tekshiruv)
 │   ├── check-i18n.mjs         ⚙️  Uch tilda kalit to'liqligi (CI da majburiy)
 │   ├── backup.mjs             ⚙️  Bazani JSON arxivga saqlash
 │   └── restore.mjs            ⚙️  Arxivdan tiklash
@@ -616,6 +616,7 @@ eslatma ikki marta bormaydi. Server o'chsa reja ham to'xtaydi (graceful shutdown
 | Rol + obyekt egaligi + biznes qoidalari | `middleware.js`, `http.js`, `access.js` |
 | Barcha kirishlar zod bilan; ObjectId formati tekshiriladi | `schemas.js` |
 | Rate limiting (login, register, forgot, 2FA, navbat, xabar, fayl, AI) | `ratelimit.js` |
+| Login cheklovi ikki qatlamli: hisob bo'yicha 10/10daq + IP bo'yicha 60/10daq — faqat IP bo'yicha cheklansa, bitta NAT ortidagi butun klinika 10 ta kirishdan keyin bloklanardi | `api/auth/login` |
 | Audit jurnali + IP faqat bosh administratorga | `audit.js` |
 | Fayl turi/hajmi/yo'li nazorati | `uploads.js` |
 | Xavfsizlik sarlavhalari, HSTS (prod), `X-Powered-By` o'chirilgan | `next.config.mjs` |
@@ -666,7 +667,7 @@ cp .env.example .env
 npm run seed              # demo: 1 bosh admin, 1 admin, 3 shifokor, 5 bemor, jadvallar
 npm run dev               # http://localhost:3000
 npm run build && npm start
-npm run test:smoke        # 145 ta tekshiruv (server ishlab turishi kerak)
+npm run test:smoke        # 147 ta tekshiruv (server ishlab turishi kerak)
 npm run test:smoke:ai     # + haqiqiy Gemini so'rovi
 npm run check:i18n        # uch tilda kalit to'liqligi
 npm test                  # check:i18n + build
@@ -677,7 +678,7 @@ npm run keygen            # ENCRYPTION_KEY uchun tasodifiy kalit
 
 **CI (`.github/workflows/ci.yml`).** Har bir push va pull request'da: `mongo:7` xizmat
 konteyneri ko'tariladi → `npm ci` → `npm audit --audit-level=high` → `check:i18n` →
-`next build` → server ishga tushiriladi → `seed` → **145 ta smoke test**. Bosqichlardan
+`next build` → server ishga tushiriladi → `seed` → **147 ta smoke test**. Bosqichlardan
 biri yiqilsa CI qizil bo'ladi.
 
 **Demo hisoblar** (parol `Parol12345`): `bosh@test.uz` (bosh admin), `admin@test.uz`,

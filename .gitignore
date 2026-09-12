@@ -2,7 +2,7 @@ node_modules
 .next
 .env
 *.log
-uploads/
-backups/
+/uploads/
+/backups/
 .DS_Store
 .claude/
