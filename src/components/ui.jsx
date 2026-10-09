@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 /* ---------------- IKONKALAR ---------------- */
 const P = {
@@ -127,9 +128,14 @@ export function ToastProvider({ children }) {
 /* ---------------- MODAL ---------------- */
 export function Modal({ open, title, wide, onClose, children, foot }) {
   const boxRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Portal faqat brauzerda ishlaydi — serverda render qilinmaydi
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (!open) return;
+    // `mounted` kutiladi — portal DOM'ga tushgach fokusni modalga beramiz
+    if (!open || !mounted) return;
     const prevFocus = document.activeElement;
     const onKey = (e) => {
       if (e.key === "Escape") return onClose?.();
@@ -150,17 +156,41 @@ export function Modal({ open, title, wide, onClose, children, foot }) {
       }
     };
     document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
+
+    /* Sahifani qotiramiz. iOS Safari'da yolg'iz `overflow:hidden` yetmaydi —
+       shuning uchun body'ni joyida "muzlatib", yopilganda scroll'ni tiklaymiz. */
+    const body = document.body;
+    const scrollY = window.scrollY || window.pageYOffset || 0;
+    const prevStyle = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+
     boxRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      Object.assign(body.style, prevStyle);
+      window.scrollTo(0, scrollY);
       prevFocus?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open, mounted, onClose]);
 
-  if (!open) return null;
-  return (
+  if (!open || !mounted) return null;
+
+  /* Modal `document.body`ga portal qilinadi — aks holda `.page` kabi
+     animatsiya/transform'li ota element `position:fixed`ni o'ziga bog'lab
+     qo'yadi va oyna ekran o'rniga sahifa markaziga tushib, cheti kesiladi. */
+  return createPortal(
     <div className="modal-root">
       <div className="modal-backdrop" onClick={onClose} />
       <div
@@ -180,7 +210,8 @@ export function Modal({ open, title, wide, onClose, children, foot }) {
         <div className="modal-body">{children}</div>
         <div className="modal-foot">{foot}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

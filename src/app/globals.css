@@ -174,14 +174,21 @@ a{text-decoration:none;color:inherit}
 
 /* ---------------- MAIN + TOPBAR ---------------- */
 .main{margin-left:var(--sidebar-w);min-height:100vh;display:flex;flex-direction:column}
+/* iOS'da `100vh` brauzer panelini hisobga olmaydi va ortiqcha scroll hosil qiladi */
+@supports (min-height:100dvh){ .main{min-height:100dvh} }
 .topbar{
-  position:sticky;top:0;z-index:40;height:var(--header-h);
+  position:sticky;top:0;z-index:40;height:var(--header-h);flex:0 0 auto;
   display:flex;align-items:center;gap:16px;padding:0 26px;
-  background:color-mix(in srgb,var(--surface) 76%,transparent);
+  background:color-mix(in srgb,var(--surface) 90%,transparent);
   backdrop-filter:blur(20px) saturate(1.6);
   -webkit-backdrop-filter:blur(20px) saturate(1.6);
   border-bottom:1px solid color-mix(in srgb,var(--border) 70%,transparent);
   box-shadow:0 1px 0 var(--hairline) inset;
+}
+/* Agar brauzer `backdrop-filter`ni qo'llab-quvvatlamasa (yoki u o'chirilgan bo'lsa),
+   sarlavha to'liq shaffofmas bo'ladi — sahifa mazmuni uning ostidan ko'rinmaydi. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .topbar{background:var(--surface);border-bottom-color:var(--border)}
 }
 .hamburger{display:none}
 .greeting{display:flex;align-items:center;gap:12px;min-width:0}
@@ -558,21 +565,29 @@ tbody tr:last-child td{border-bottom:none}
 .switch.on::after{transform:translateX(20px)}
 
 /* ---------------- MODAL ---------------- */
-.modal-root{position:fixed;inset:0;z-index:100}
-.modal-backdrop{position:absolute;inset:0;background:rgba(21,19,42,.5);backdrop-filter:blur(4px);animation:fadeIn .2s}
+/* Oyna ekranga flex bilan markazlashtiriladi — shunda u hech qachon
+   ekran chegarasidan chiqib ketmaydi, sarlavha va pastki tugmalar doim ko'rinadi. */
+.modal-root{
+  position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right))
+          max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+  overscroll-behavior:contain;
+}
+/* iOS'da `inset:0` brauzer paneli hisobiga ko'rinadigan joydan baland bo'lishi mumkin */
+@supports (height:100dvh){ .modal-root{height:100dvh} }
+.modal-backdrop{position:fixed;inset:0;background:rgba(21,19,42,.5);backdrop-filter:blur(4px);animation:fadeIn .2s}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:min(620px,calc(100vw - 32px));max-height:88vh;display:flex;flex-direction:column;
+  position:relative;width:min(620px,100%);max-height:100%;display:flex;flex-direction:column;
   background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--shadow-lg);
   border:1px solid var(--border);overflow:hidden;animation:pop .28s cubic-bezier(.34,1.4,.64,1);
 }
-@keyframes pop{from{opacity:0;transform:translate(-50%,-46%) scale(.95)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-.modal.wide{width:min(760px,calc(100vw - 32px))}
-.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px;border-bottom:1px solid var(--border)}
-.modal-head h3{font-size:17px;font-weight:700;letter-spacing:-.3px}
-.modal-body{padding:22px;overflow-y:auto}
-.modal-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-end;background:var(--surface-2)}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+.modal.wide{width:min(760px,100%)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px;border-bottom:1px solid var(--border);flex:0 0 auto}
+.modal-head h3{font-size:17px;font-weight:700;letter-spacing:-.3px;min-width:0;overflow-wrap:anywhere}
+.modal-body{padding:22px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;flex:1 1 auto;min-height:0}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap;background:var(--surface-2);flex:0 0 auto}
 .modal-foot:empty{display:none}
 
 .p-head{display:flex;align-items:center;gap:15px;padding-bottom:18px;border-bottom:1px solid var(--border);margin-bottom:18px}
@@ -723,7 +738,9 @@ tbody tr:last-child td{border-bottom:none}
   .form-grid{grid-template-columns:1fr}
   .info-grid{grid-template-columns:1fr}
   .card{padding:17px;border-radius:22px}
-  .modal{width:calc(100vw - 22px);max-height:92vh}
+  .modal-root{padding:max(11px,env(safe-area-inset-top)) max(11px,env(safe-area-inset-right))
+              max(11px,env(safe-area-inset-bottom)) max(11px,env(safe-area-inset-left))}
+  .modal{width:100%}
   .modal-foot{flex-direction:column-reverse}
   .modal-foot > *{width:100%}
   .toast-stack{left:16px;right:16px;bottom:16px}
@@ -906,11 +923,13 @@ tbody tr:last-child td{border-bottom:none}
 @keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
 @keyframes slideRight{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
 
-.page{animation:riseIn .34s cubic-bezier(.22,1,.36,1) both}
+/* `backwards` (`both` emas): animatsiya tugagach elementda `transform` izi
+   qolmaydi — aks holda u ichidagi `position:fixed` elementlarni o'ziga bog'lab oladi. */
+.page{animation:riseIn .34s cubic-bezier(.22,1,.36,1) backwards}
 .page .card,
 .page .stat-card,
 .page .kpi,
-.page .mini-card{animation:riseIn .42s cubic-bezier(.22,1,.36,1) both}
+.page .mini-card{animation:riseIn .42s cubic-bezier(.22,1,.36,1) backwards}
 /* Bosqichma-bosqich chiqish */
 .stats-grid > *:nth-child(1),.kpi-grid > *:nth-child(1){animation-delay:.02s}
 .stats-grid > *:nth-child(2),.kpi-grid > *:nth-child(2){animation-delay:.06s}
@@ -922,7 +941,7 @@ tbody tr:last-child td{border-bottom:none}
 .kpi-grid > *:nth-child(8){animation-delay:.30s}
 .grid-2 > *:nth-child(2){animation-delay:.08s}
 
-.nav-item{animation:slideRight .3s cubic-bezier(.22,1,.36,1) both}
+.nav-item{animation:slideRight .3s cubic-bezier(.22,1,.36,1) backwards}
 .nav .nav-item:nth-child(1){animation-delay:.02s}
 .nav .nav-item:nth-child(2){animation-delay:.04s}
 .nav .nav-item:nth-child(3){animation-delay:.06s}
@@ -932,7 +951,7 @@ tbody tr:last-child td{border-bottom:none}
 .nav .nav-item:nth-child(7){animation-delay:.14s}
 .nav .nav-item:nth-child(8){animation-delay:.16s}
 
-tbody tr{animation:riseIn .3s cubic-bezier(.22,1,.36,1) both}
+tbody tr{animation:riseIn .3s cubic-bezier(.22,1,.36,1) backwards}
 tbody tr:nth-child(1){animation-delay:.01s}
 tbody tr:nth-child(2){animation-delay:.03s}
 tbody tr:nth-child(3){animation-delay:.05s}
@@ -940,8 +959,8 @@ tbody tr:nth-child(4){animation-delay:.07s}
 tbody tr:nth-child(5){animation-delay:.09s}
 tbody tr:nth-child(n+6){animation-delay:.11s}
 
-.slot{animation:popIn .26s cubic-bezier(.34,1.4,.64,1) both}
-.bubble{animation:popIn .24s cubic-bezier(.34,1.4,.64,1) both}
+.slot{animation:popIn .26s cubic-bezier(.34,1.4,.64,1) backwards}
+.bubble{animation:popIn .24s cubic-bezier(.34,1.4,.64,1) backwards}
 
 /* ---------- Bosish effekti ---------- */
 .primary-btn,.secondary-btn,.mini-btn,.danger-btn,.tab,.chip,.slot,.stat-card,.mini-card{
@@ -1440,8 +1459,13 @@ button.recent-row:hover,button.appt-row:hover,.conv-item:hover{transform:transla
     box-shadow:none !important;border:1px solid #ddd !important;background:#fff !important;
     break-inside:avoid;page-break-inside:avoid
   }
-  .modal-root{position:static !important}
-  .modal{position:static !important;transform:none !important;max-height:none !important;width:100% !important}
+  /* Oyna ochiq turib chop etilganda body "muzlatilgan" bo'ladi — qog'ozda
+     butun mazmun chiqishi uchun qotirishni bekor qilamiz. */
+  html,body{position:static !important;top:auto !important;left:auto !important;
+    overflow:visible !important;height:auto !important;width:auto !important}
+  .modal-root{position:static !important;display:block !important;height:auto !important;padding:0 !important}
+  .modal{position:static !important;transform:none !important;max-height:none !important;width:100% !important;
+    overflow:visible !important;animation:none !important}
   .modal-backdrop{display:none !important}
   .modal-body{overflow:visible !important;max-height:none !important}
   .table-wrap{overflow:visible !important;background:none !important}
