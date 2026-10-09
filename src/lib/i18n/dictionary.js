@@ -107,7 +107,6 @@ export const DICT = {
     "auth.point2": "Shifokoringizga biriktirilib, uydan navbat oling",
     "auth.point3": "Analiz natijalarini yozing — shifokor izoh beradi",
     "auth.point4": "Shifokor bilan yopiq, real vaqtli suhbat",
-    "auth.demoTitle": "Test hisoblar:",
     "auth.demoDoctor": "Shifokor",
     "auth.demoPatient": "Bemor",
 
@@ -500,7 +499,6 @@ export const DICT = {
     "auth.point2": "Шифокорингизга бириктирилиб, уйдан навбат олинг",
     "auth.point3": "Анализ натижаларини ёзинг — шифокор изоҳ беради",
     "auth.point4": "Шифокор билан ёпиқ, реал вақтли суҳбат",
-    "auth.demoTitle": "Тест ҳисоблар:",
     "auth.demoDoctor": "Шифокор",
     "auth.demoPatient": "Бемор",
 
@@ -893,7 +891,6 @@ export const DICT = {
     "auth.point2": "Прикрепитесь к врачу и записывайтесь из дома",
     "auth.point3": "Вносите результаты анализов — врач их прокомментирует",
     "auth.point4": "Закрытый чат с врачом в реальном времени",
-    "auth.demoTitle": "Тестовые аккаунты:",
     "auth.demoDoctor": "Врач",
     "auth.demoPatient": "Пациент",
 

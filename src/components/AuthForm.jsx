@@ -211,22 +211,6 @@ export default function AuthForm({ mode }) {
                 {isLogin ? t("auth.goRegister") : t("auth.goLogin")}
               </Link>
             </p>
-
-            {isLogin && (
-              <div className="demo-hint">
-                <b>{t("auth.demoTitle")}</b>
-                <br />
-                {t("role.superadmin")} — bosh@test.uz
-                <br />
-                {t("role.admin")} — admin@test.uz
-                <br />
-                {t("role.doctor")} — shifokor@test.uz
-                <br />
-                {t("role.patient")} — bemor@test.uz
-                <br />
-                {t("auth.password")} — Parol12345
-              </div>
-            )}
           </form>
         )}
       </section>
