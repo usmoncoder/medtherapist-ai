@@ -5,6 +5,7 @@ import { get, post, patch, del, api } from "@/lib/api";
 import { getAllergyChips } from "@/lib/reference";
 import FileUploader from "@/components/FileUploader";
 import EncounterForm from "@/components/EncounterForm";
+import { printDocument, section, cells, esc } from "@/lib/printDoc";
 
 /* ---------------- BEMOR KARTASI + ANALIZ KIRITISH ---------------- */
 const EMPTY_ANALYSIS = {
@@ -69,6 +70,84 @@ export function PatientCard({ data, onClose, onAi, onReload, toast, i18n }) {
     onReload();
   }
 
+  /* Kartaning toza, qog'ozga mos nusxasi — brauzer uni PDF qilib saqlaydi.
+     Sahifaning o'zini chop etishdan farqi: menyu, tugmalar va fon yo'q,
+     ma'lumot esa to'liq (ro'yxatlar qisqartirilmaydi). */
+  function downloadPdf() {
+    const dash = "\u2014";
+    const rows = (items, cols) =>
+      items.length
+        ? `<table><thead><tr>${cols.map((c) => `<th>${esc(c.h)}</th>`).join("")}</tr></thead>` +
+          `<tbody>${items
+            .map((it) => `<tr>${cols.map((c) => `<td>${esc(c.v(it) || dash)}</td>`).join("")}</tr>`)
+            .join("")}</tbody></table>`
+        : "";
+
+    const encounterBlocks = encounters
+      .map((e) => {
+        const line = (lab, val) => (val ? `<p class="text"><b>${esc(lab)}:</b> ${esc(val)}</p>` : "");
+        const rx = (e.prescriptions || [])
+          .map((r) => `${r.name}${[r.dose, r.duration].filter(Boolean).length
+            ? ` (${[r.dose, r.duration].filter(Boolean).join(", ")})` : ""}`)
+          .join("; ");
+        return `<div class="block"><p class="text"><b>${esc(e.assessment)}</b>` +
+          ` <span class="muted">${esc(fd(e.createdAt))}</span></p>` +
+          line("S", e.subjective) + line("O", e.objective) + line("P", e.plan) +
+          line(t("encounter.prescriptions"), rx) + `</div>`;
+      })
+      .join("");
+
+    const html = `
+      <div class="doc-head">
+        <div>
+          <div class="brand">${esc(t("app.name"))}</div>
+          <h1>${esc(t("patients.card"))}</h1>
+          <div class="sub">${esc(p.fullName)}${age != null ? ` ${dash} ${age} ${esc(t("common.years"))}` : ""}</div>
+        </div>
+        <div class="meta">${esc(t("print.printedAt"))}<br><b>${esc(fd(new Date()))}</b></div>
+      </div>
+
+      ${section(t("appt.patient"), cells([
+        [t("auth.fullName"), p.fullName],
+        [t("profile.gender"), pr.gender ? t(`profile.${pr.gender === "erkak" ? "male" : "female"}`) : dash],
+        [t("auth.phone"), pr.phone || p.email || dash],
+        [t("profile.bloodType"), pr.bloodType || dash],
+        [t("profile.address"), pr.address || dash],
+        [t("patients.allergyCol"), pr.allergies?.join(", ") || t("common.none")],
+        [t("profile.chronic"), pr.chronicConditions?.join(", ") || dash],
+        [t("patients.assigned"), p.assigned ? t("common.yes") : t("common.no")],
+      ]))}
+
+      ${section(t("medical.title"),
+        `<p class="text"><b>${esc(t("profile.complaint"))}:</b> ${esc(pr.complaint || t("print.noData"))}</p>` +
+        `<p class="text"><b>${esc(t("profile.history"))}:</b> ${esc(pr.history || t("print.noData"))}</p>`)}
+
+      ${section(t("appt.title"), rows(data.appointments, [
+        { h: t("common.date"), v: (a) => `${fd(a.startsAt)} ${ft(a.startsAt)}` },
+        { h: t("appt.reason"), v: (a) => a.reason },
+        { h: t("common.status"), v: (a) => status(a.status) },
+      ]))}
+
+      ${section(t("encounter.list"), encounterBlocks)}
+
+      ${section(t("nav.analyses"), rows(data.analyses, [
+        { h: t("analysis.name"), v: (a) => a.name },
+        { h: t("analysis.value"), v: (a) => `${a.value} ${a.unit || ""}`.trim() },
+        { h: t("analysis.ref"), v: (a) => a.refRange },
+        { h: t("analysis.flag"), v: (a) => t(`flag.${a.flag}`) },
+        { h: t("analysis.takenAt"), v: (a) => fd(a.takenAt) },
+        { h: t("patient.doctorComment"), v: (a) => a.doctorComment },
+      ]))}
+
+      <footer>
+        <span>${esc(t("app.name"))} ${dash} ${esc(t("app.tagline"))}</span>
+        <span>${esc(p.fullName)}</span>
+      </footer>`;
+
+    // Sarlavha saqlanadigan PDF faylning nomiga aylanadi
+    printDocument({ title: `${t("patients.card")} ${dash} ${p.fullName}`, html });
+  }
+
   return (
     <Modal
       open
@@ -79,7 +158,10 @@ export function PatientCard({ data, onClose, onAi, onReload, toast, i18n }) {
         <>
           <button className="secondary-btn" onClick={onClose}>{t("common.close")}</button>
           <button className="secondary-btn" onClick={() => window.print()}>
-            <Icon name="download" /> {t("common.print")}
+            <Icon name="clipboard" /> {t("common.print")}
+          </button>
+          <button className="secondary-btn" onClick={downloadPdf}>
+            <Icon name="download" /> {t("common.downloadPdf")}
           </button>
           <button className="primary-btn" onClick={() => onAi(p.id)}>
             <Icon name="sparkle" /> {t("ai.aiAnalyze")}

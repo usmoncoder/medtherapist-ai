@@ -9,11 +9,24 @@ const password = z
   .regex(/[A-Za-z]/, "Parolda kamida bitta harf bo'lsin")
   .regex(/[0-9]/, "Parolda kamida bitta raqam bo'lsin");
 
+/* Telefon raqam: formatni qattiq belgilamaymiz (+998, 998, 8 bilan boshlanishi
+   mumkin), lekin raqamlar soni 9–15 ta bo'lishi shart — bu xato terishni ushlaydi. */
+export const phoneRequired = z
+  .string()
+  .trim()
+  .min(1, "Telefon raqamni kiriting")
+  .max(30, "Telefon raqam juda uzun")
+  .refine((v) => /^[+\d][\d\s()\-.]*$/.test(v), "Telefon raqamda faqat raqam va + belgisi bo'lsin")
+  .refine((v) => {
+    const digits = v.replace(/\D/g, "").length;
+    return digits >= 9 && digits <= 15;
+  }, "Telefon raqam to'liq emas — masalan +998 90 123 45 67");
+
 export const registerSchema = z.object({
   fullName: trimmed(3, 120, "Ism 3–120 belgi bo'lsin"),
   email: z.string().trim().toLowerCase().email("Email noto'g'ri"),
   password,
-  phone: z.string().trim().max(30).optional(),
+  phone: phoneRequired,
 });
 
 export const loginSchema = z.object({
@@ -152,6 +165,7 @@ export const aiRequestSchema = z.object({
   symptoms: z.array(z.string().trim().max(60)).max(20).optional(),
   bp: z.string().trim().max(20).optional(),
   pulse: z.union([z.string(), z.number()]).optional(),
+  temp: z.union([z.string(), z.number()]).optional(),
   extra: z.string().trim().max(3000).optional(),
 });
 

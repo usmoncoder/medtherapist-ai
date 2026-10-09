@@ -13,6 +13,10 @@ const PAGE = 200;
 
 const shapeAtt = (a) => ({ id: a._id.toString(), name: a.name, mime: a.mime, size: a.size });
 
+// Matnsiz xabarning suhbatlar ro'yxatidagi qisqa ko'rinishi
+const previewFor = (atts = []) =>
+  atts.length && atts.every((a) => String(a.mime || "").startsWith("audio/")) ? "🎤" : "📎";
+
 export const GET = route(async ({ params, session }) => {
   if (!objectId.safeParse(params.id).success) throw new ApiError("VALIDATION", "ID noto'g'ri");
   await assertConversationMember(params.id, session);
@@ -68,7 +72,10 @@ export const POST = route(async ({ req, params, session }) => {
   await Conversation.updateOne(
     { _id: params.id },
     {
-      $set: { lastMessage: { text: msg.text || "📎", at: msg.createdAt, from: session.sub } },
+      $set: {
+        // Matnsiz xabar ro'yxatda belgi bilan ko'rinadi: ovozli xabar yoki fayl
+        lastMessage: { text: msg.text || previewFor(msg.attachments), at: msg.createdAt, from: session.sub },
+      },
       $inc: { [`unread.${otherSide}`]: 1 },
     }
   );

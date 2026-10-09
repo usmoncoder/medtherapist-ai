@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Icon, useToast } from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
 import { post } from "@/lib/api";
+import { formatBp } from "@/lib/vitals";
 
 const EMPTY = {
   subjective: "", objective: "", assessment: "", plan: "",
@@ -61,7 +62,13 @@ export default function EncounterForm({ patientId, appointmentId, onSaved, onCan
         <div className="field full">
           <label>{t("encounter.vitals")}</label>
           <div className="vitals-row">
-            <input value={form.bp} onChange={set("bp")} placeholder={t("ai.bp")} aria-label={t("ai.bp")} />
+            <input
+              value={form.bp}
+              onChange={(e) => setForm((f) => ({ ...f, bp: formatBp(e.target.value) }))}
+              inputMode="numeric"
+              placeholder={t("ai.bp")}
+              aria-label={t("ai.bp")}
+            />
             <input value={form.pulse} onChange={set("pulse")} placeholder={t("ai.pulse")} aria-label={t("ai.pulse")} />
             <input value={form.temp} onChange={set("temp")} placeholder={t("encounter.temp")} aria-label={t("encounter.temp")} />
             <input value={form.weight} onChange={set("weight")} placeholder={t("encounter.weight")} aria-label={t("encounter.weight")} />

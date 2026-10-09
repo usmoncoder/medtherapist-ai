@@ -35,7 +35,7 @@ export async function sendMail({ to, subject, text, html }) {
   }
   try {
     await t.sendMail({
-      from: process.env.SMTP_FROM || "MedTherapist AI <no-reply@medtherapist.uz>",
+      from: process.env.SMTP_FROM || "Med AI <no-reply@medtherapist.uz>",
       to,
       subject,
       text,
@@ -50,17 +50,17 @@ export async function sendMail({ to, subject, text, html }) {
 
 const T = {
   uz: {
-    subject: "Parolni tiklash — MedTherapist AI",
+    subject: "Parolni tiklash — Med AI",
     body: (link) =>
       `Assalomu alaykum!\n\nParolni tiklash uchun quyidagi havolaga o'ting:\n${link}\n\nHavola 1 soat amal qiladi. Agar siz so'ramagan bo'lsangiz, bu xatni e'tiborsiz qoldiring.`,
   },
   uzc: {
-    subject: "Паролни тиклаш — MedTherapist AI",
+    subject: "Паролни тиклаш — Med AI",
     body: (link) =>
       `Ассалому алайкум!\n\nПаролни тиклаш учун қуйидаги ҳаволага ўтинг:\n${link}\n\nҲавола 1 соат амал қилади. Агар сиз сўрамаган бўлсангиз, бу хатни эътиборсиз қолдиринг.`,
   },
   ru: {
-    subject: "Восстановление пароля — MedTherapist AI",
+    subject: "Восстановление пароля — Med AI",
     body: (link) =>
       `Здравствуйте!\n\nДля восстановления пароля перейдите по ссылке:\n${link}\n\nСсылка действует 1 час. Если вы не запрашивали сброс, просто проигнорируйте это письмо.`,
   },

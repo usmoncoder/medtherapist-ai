@@ -74,7 +74,9 @@ function buildPrompt(input) {
     `Bemor: ${input.patientName || "—"}, ${input.age ?? "—"} yosh, ${input.gender || "—"}`,
     `Shikoyatlar: ${input.complaint || "—"}`,
     `Simptomlar: ${(input.symptoms || []).join(", ") || "—"}`,
-    `Qon bosimi: ${input.bp || "—"}, Puls: ${input.pulse || "—"}`,
+    `Qon bosimi: ${input.bp || "—"}, Puls: ${input.pulse || "—"}, Tana harorati: ${
+      input.temp ? `${input.temp} °C` : "—"
+    }`,
     `Allergiya: ${input.allergies || "—"}`,
     `Surunkali kasalliklar: ${input.chronic || "—"}`,
     `Tibbiy tarix: ${input.history || "—"}`,

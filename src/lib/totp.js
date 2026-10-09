@@ -52,7 +52,7 @@ export function verifyTotp(secret, token, window = 1) {
   return false;
 }
 
-export const otpauthUri = (secret, email, issuer = "MedTherapist AI") =>
+export const otpauthUri = (secret, email, issuer = "Med AI") =>
   `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(email)}` +
   `?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=${DIGITS}&period=${STEP}`;
 

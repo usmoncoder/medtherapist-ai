@@ -648,7 +648,8 @@ tbody tr:last-child td{border-bottom:none}
 .bubble.mine{align-self:flex-end;background:linear-gradient(135deg,var(--purple),var(--purple-600));color:#fff;border-bottom-right-radius:5px}
 .bubble.theirs{align-self:flex-start;background:var(--surface-2);border:1px solid var(--border);border-bottom-left-radius:5px}
 .bubble time{display:block;font-size:10.5px;opacity:.7;margin-top:4px}
-.chat-foot{display:flex;gap:10px;padding:14px;border-top:1px solid var(--border)}
+.chat-foot{display:flex;gap:10px;padding:14px;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.chat-foot input{min-width:0}
 .chat-foot input{flex:1;padding:12px 14px;border-radius:13px;border:1px solid var(--border);background:var(--surface-2);font-size:13.2px}
 .chat-foot input:focus{outline:none;border-color:var(--purple);background:var(--surface)}
 .typing{font-size:11.5px;color:var(--purple);padding:0 20px 8px;font-style:italic}
@@ -842,6 +843,33 @@ tbody tr:last-child td{border-bottom:none}
   display:grid;place-items:center;color:var(--muted);flex-shrink:0;transition:.15s
 }
 .attach-btn:hover{color:var(--purple);border-color:var(--purple-soft-2)}
+.attach-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ---------------- OVOZLI XABAR ---------------- */
+/* Yozuv paytida butun qatorni egallaydi — matn maydoni siqilib qolmasin */
+.voice-rec{
+  /* Yozuv paneli har doim birinchi qatorda — matn maydoni ostida qoladi */
+  order:-1;
+  flex:1 1 100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px 12px;border-radius:13px;background:var(--red-soft);
+  border:1px solid color-mix(in srgb,var(--red) 28%,transparent);
+}
+.voice-dot{
+  width:10px;height:10px;border-radius:50%;background:var(--red);flex-shrink:0;
+  animation:softPulse 1.4s ease-in-out infinite;box-shadow:0 0 0 0 rgba(240,68,56,.45)
+}
+.voice-time{
+  flex:1;min-width:120px;font-size:12.8px;font-weight:600;color:var(--red);
+  font-variant-numeric:tabular-nums
+}
+.voice-chip{display:inline-flex;align-items:center;gap:6px;max-width:100%}
+.voice-chip audio{height:40px;max-width:min(260px,100%);border-radius:12px}
+.voice-chip button{color:var(--muted);display:grid;place-items:center;flex-shrink:0}
+.voice-chip button:hover{color:var(--red)}
+.bubble .voice-chip{margin-top:6px}
+/* Binafsha pufak ustidagi pleyer o'qilishi uchun oq taglik */
+.bubble.mine .voice-chip audio{background:rgba(255,255,255,.9)}
+.bubble.mine .voice-chip button{color:rgba(255,255,255,.85)}
 
 /* ---------------- ANALIZ BAYROG'I ---------------- */
 .flag{font-size:11px;font-weight:700;padding:3px 9px;border-radius:8px;white-space:nowrap}

@@ -1,6 +1,7 @@
 import { EXTRA } from "./dictionary.extra.js";
 import { EXTRA2 } from "./dictionary.extra2.js";
 import { EXTRA3 } from "./dictionary.extra3.js";
+import { EXTRA4 } from "./dictionary.extra4.js";
 
 // Uch til: uz (lotin), uzc (kirill), ru (rus).
 // Kalitlar nuqta bilan bo'lingan: bo'lim.kalit
@@ -19,7 +20,7 @@ export const MONTHS = {
 export const DICT = {
   /* ============================ UZ — LOTIN ============================ */
   uz: {
-    "app.name": "MedTherapist AI",
+    "app.name": "Med AI",
     "app.tagline": "Raqamli klinika",
     "app.promo": "Sog'liqni\nraqamli\nboshqaring",
     "app.version": "Versiya 1.0.0",
@@ -412,7 +413,7 @@ export const DICT = {
 
   /* ============================ UZ — KIRILL ============================ */
   uzc: {
-    "app.name": "MedTherapist AI",
+    "app.name": "Med AI",
     "app.tagline": "Рақамли клиника",
     "app.promo": "Соғлиқни\nрақамли\nбошқаринг",
     "app.version": "Версия 1.0.0",
@@ -805,7 +806,7 @@ export const DICT = {
 
   /* ============================== RUSCHA ============================== */
   ru: {
-    "app.name": "MedTherapist AI",
+    "app.name": "Med AI",
     "app.tagline": "Цифровая клиника",
     "app.promo": "Управляйте\nздоровьем\nцифрово",
     "app.version": "Версия 1.0.0",
@@ -1198,4 +1199,4 @@ export const DICT = {
 };
 
 // Ikkinchi bosqich kalitlari asosiy lug'atga qo'shiladi
-for (const lang of Object.keys(DICT)) Object.assign(DICT[lang], EXTRA[lang] || {}, EXTRA2[lang] || {}, EXTRA3[lang] || {});
+for (const lang of Object.keys(DICT)) Object.assign(DICT[lang], EXTRA[lang] || {}, EXTRA2[lang] || {}, EXTRA3[lang] || {}, EXTRA4[lang] || {});

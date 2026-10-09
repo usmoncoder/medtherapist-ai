@@ -2,7 +2,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 
 export const metadata = {
-  title: "MedTherapist AI",
+  title: "Med AI",
   description: "Terapevtlar va bemorlar uchun raqamli klinika",
 };
 

@@ -46,6 +46,7 @@ const P = {
   arrowLeft: <path d="M19 12H5M12 19l-7-7 7-7" />,
   arrowRight: <path d="M5 12h14M12 5l7 7-7 7" />,
   building: <><path d="M3 21h18M5 21V7l7-4 7 4v14" /><path d="M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h.01M15 17h.01" /></>,
+  mic: <><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0" /><path d="M12 18v4M8 22h8" /></>,
 };
 
 export function Icon({ name, ...rest }) {
@@ -343,6 +344,18 @@ export const formatBytes = (n) => {
 };
 
 export function FileChip({ file, onRemove, downloadable = true }) {
+  // Ovozli xabar ro'yxat elementi emas — uni to'g'ridan-to'g'ri eshitish mumkin
+  if (String(file.mime || "").startsWith("audio/") && file.id) {
+    return (
+      <span className="voice-chip">
+        <audio controls preload="metadata" src={`/api/uploads/${file.id}`} />
+        {onRemove && (
+          <button onClick={onRemove} aria-label="x"><Icon name="close" strokeWidth="2.4" /></button>
+        )}
+      </span>
+    );
+  }
+
   const body = (
     <>
       <Icon name={file.mime?.startsWith("image/") ? "file" : "file"} />

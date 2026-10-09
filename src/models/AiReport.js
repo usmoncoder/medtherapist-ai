@@ -10,6 +10,7 @@ const aiReportSchema = new mongoose.Schema(
       symptoms: [String],
       bp: String,
       pulse: String,
+      temp: String,
       extra: String,
     },
     result: {

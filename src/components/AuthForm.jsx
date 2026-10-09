@@ -76,6 +76,12 @@ export default function AuthForm({ mode }) {
 
   async function submit(e) {
     e?.preventDefault();
+    // Telefon raqam ro'yxatdan o'tishda majburiy — serverga bormasdan tekshiramiz,
+    // shunda xato xabari foydalanuvchi tilida chiqadi
+    if (!isLogin) {
+      const digits = form.phone.replace(/\D/g, "").length;
+      if (digits < 9 || digits > 15) return setErr(t("auth.phoneInvalid"));
+    }
     setLoading(true);
     setErr("");
     const res = await post(
@@ -159,8 +165,16 @@ export default function AuthForm({ mode }) {
               )}
               {!isLogin && (
                 <div className="field full">
-                  <label>{t("auth.phone")}</label>
-                  <input value={form.phone} onChange={set("phone")} placeholder="+998 90 123 45 67" autoComplete="tel" />
+                  <label>{t("auth.phone")} <span>*</span></label>
+                  <input
+                    type="tel"
+                    value={form.phone}
+                    onChange={set("phone")}
+                    placeholder="+998 90 123 45 67"
+                    autoComplete="tel"
+                    inputMode="tel"
+                  />
+                  <small>{t("auth.phoneHint")}</small>
                 </div>
               )}
               <div className="field full">

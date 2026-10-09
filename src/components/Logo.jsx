@@ -2,7 +2,7 @@
 import { useId } from "react";
 
 /**
- * MedTherapist AI belgisi — binafsha gradient "squircle" ustida
+ * Med AI belgisi — binafsha gradient "squircle" ustida
  * yurak + puls chizig'i. Har bir nusxa uchun gradient id noyob.
  */
 export function Logo({ size = 42, radius = 13 }) {

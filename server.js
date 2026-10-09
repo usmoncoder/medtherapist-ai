@@ -146,7 +146,7 @@ async function main() {
   setTimeout(sendReminders, 15_000); // ishga tushgach bir marta
 
   server.listen(port, host, () =>
-    console.log(`> MedTherapist AI: http://localhost:${port} (${dev ? "dev" : "production"})`)
+    console.log(`> Med AI: http://localhost:${port} (${dev ? "dev" : "production"})`)
   );
 
   // Toza to'xtash — ochiq ulanishlarni yopamiz

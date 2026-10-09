@@ -4,10 +4,13 @@ import { BotFace, Empty, Icon } from "./ui";
 import { useI18n } from "@/lib/i18n";
 import { get, post } from "@/lib/api";
 import { getSymptoms } from "@/lib/reference";
+import { formatBp } from "@/lib/vitals";
 
 export default function AiPanel({ patients, toast, preselect, onUsed }) {
   const { t, lang, fdt } = useI18n();
-  const [form, setForm] = useState({ patientId: "", complaint: "", bp: "", pulse: "", extra: "" });
+  const [form, setForm] = useState({
+    patientId: "", complaint: "", bp: "", pulse: "", temp: "", extra: "",
+  });
   const [symptoms, setSymptoms] = useState([]);
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState(-1);
@@ -19,6 +22,8 @@ export default function AiPanel({ patients, toast, preselect, onUsed }) {
 
   const STEPS = [t("ai.step1"), t("ai.step2"), t("ai.step3"), t("ai.step4")];
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  // Qon bosimida "/" belgisi o'zi qo'yiladi — klaviaturani almashtirish shart emas
+  const setBp = (e) => setForm((f) => ({ ...f, bp: formatBp(e.target.value) }));
 
   const loadReports = () =>
     get("/api/ai").then((res) => {
@@ -141,11 +146,21 @@ export default function AiPanel({ patients, toast, preselect, onUsed }) {
             </div>
             <div className="field">
               <label>{t("ai.bp")}</label>
-              <input value={form.bp} onChange={set("bp")} placeholder="155/95" />
+              <input
+                value={form.bp}
+                onChange={setBp}
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="155/95"
+              />
             </div>
             <div className="field">
               <label>{t("ai.pulse")}</label>
-              <input value={form.pulse} onChange={set("pulse")} placeholder="88" />
+              <input value={form.pulse} onChange={set("pulse")} inputMode="numeric" placeholder="88" />
+            </div>
+            <div className="field">
+              <label>{t("ai.temp")}</label>
+              <input value={form.temp} onChange={set("temp")} inputMode="decimal" placeholder="36.6" />
             </div>
             <div className="field full">
               <label>{t("ai.extra")}</label>

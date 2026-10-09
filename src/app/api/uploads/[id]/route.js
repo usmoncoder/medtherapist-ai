@@ -39,16 +39,54 @@ export const GET = route(async ({ params, session, req }) => {
   const buf = await readFile(att.storageKey).catch(() => null);
   if (!buf) throw new ApiError("FILE_NOT_FOUND");
 
-  await audit(session, ACTIONS.FILE_DOWNLOAD,
-    { targetType: "Attachment", targetId: att._id, targetName: att.name }, req);
+  const total = buf.length;
+  const headers = {
+    "Content-Type": att.mime,
+    // Ovozli xabar uchun shart: Safari <audio> faylni Range so'rovi bilan oladi
+    // va 206 javob kelmasa umuman ijro etmaydi.
+    "Accept-Ranges": "bytes",
+    "Content-Disposition": `inline; filename="${encodeURIComponent(att.name)}"`,
+    "Cache-Control": "private, no-store",
+    "X-Content-Type-Options": "nosniff",
+  };
 
-  return new Response(buf, {
+  const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.get("range") || "");
+  let start = 0;
+  let end = total - 1;
+  if (m) {
+    if (m[1] === "") {
+      // `bytes=-N` — oxirgi N bayt
+      start = Math.max(0, total - Number(m[2] || 0));
+    } else {
+      start = Number(m[1]);
+      if (m[2] !== "") end = Math.min(Number(m[2]), total - 1);
+    }
+    if (!Number.isFinite(start) || start > end || start >= total) {
+      return new Response(null, {
+        status: 416,
+        headers: { ...headers, "Content-Range": `bytes */${total}` },
+      });
+    }
+  }
+
+  // Audit yozuvi har bir surish (seek) uchun takrorlanmasin — faqat
+  // faylning boshidan olingan so'rov "yuklab olindi" deb belgilanadi.
+  if (start === 0) {
+    await audit(session, ACTIONS.FILE_DOWNLOAD,
+      { targetType: "Attachment", targetId: att._id, targetName: att.name }, req);
+  }
+
+  if (!m) {
+    return new Response(buf, { headers: { ...headers, "Content-Length": String(total) } });
+  }
+
+  const slice = buf.subarray(start, end + 1);
+  return new Response(slice, {
+    status: 206,
     headers: {
-      "Content-Type": att.mime,
-      "Content-Length": String(att.size),
-      "Content-Disposition": `inline; filename="${encodeURIComponent(att.name)}"`,
-      "Cache-Control": "private, no-store",
-      "X-Content-Type-Options": "nosniff",
+      ...headers,
+      "Content-Length": String(slice.length),
+      "Content-Range": `bytes ${start}-${end}/${total}`,
     },
   });
 });

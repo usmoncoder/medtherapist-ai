@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Avatar, Empty, FileChip, Icon } from "./ui";
 import FileUploader from "./FileUploader";
+import VoiceRecorder from "./VoiceRecorder";
 import { useI18n } from "@/lib/i18n";
 import { get, post } from "@/lib/api";
 
@@ -198,6 +199,7 @@ export default function Chat({ me, onUnreadChange }) {
 
             <div className="chat-foot">
               <FileUploader context="message" files={[]} onChange={(f) => setFiles((p) => [...p, ...f])} compact />
+              <VoiceRecorder onRecorded={(att) => setFiles((p) => [...p, att])} disabled={sending} />
               <input
                 placeholder={t("chat.placeholder")}
                 aria-label={t("chat.placeholder")}
