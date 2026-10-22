@@ -24,6 +24,8 @@ export const ACTIONS = {
   APPOINTMENT_CREATE: "appointment_create",
   APPOINTMENT_DECIDE: "appointment_decide",
   ENCOUNTER_CREATE: "encounter_create",
+  MED_REMINDER_CREATE: "med_reminder_create",
+  MED_REMINDER_DELETE: "med_reminder_delete",
   ANALYSIS_CREATE: "analysis_create",
   ANALYSIS_UPDATE: "analysis_update",
   ANALYSIS_DELETE: "analysis_delete",

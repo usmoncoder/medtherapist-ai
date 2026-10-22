@@ -16,6 +16,7 @@ const encounterSchema = new mongoose.Schema(
       bp: String,
       pulse: String,
       temp: String,
+      spo2: String,
       weight: String,
       _id: false,
     },

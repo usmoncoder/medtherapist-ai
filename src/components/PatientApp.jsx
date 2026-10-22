@@ -24,6 +24,7 @@ import { getAllergyChips, getFaq } from "@/lib/reference";
 import { MyDoctor } from "@/components/patient/MyDoctor";
 import { QueueSection } from "@/components/patient/QueueSection";
 import { AnalysesView } from "@/components/patient/AnalysesView";
+import { MedsSection } from "@/components/patient/MedsSection";
 import { Onboarding } from "@/components/patient/Onboarding";
 import Timeline from "./Timeline";
 import { ProfileSection } from "@/components/patient/ProfileSection";
@@ -33,6 +34,7 @@ const NAV = [
   { key: "doctor", labelKey: "nav.myDoctor", icon: "user" },
   { key: "queue", labelKey: "nav.queue", icon: "calendar" },
   { key: "analyses", labelKey: "nav.analyses", icon: "flask" },
+  { key: "meds", labelKey: "nav.meds", icon: "pill" },
   { key: "timeline", labelKey: "nav.timeline", icon: "clipboard" },
   { key: "chat", labelKey: "nav.chat", icon: "chat" },
   { key: "profile", labelKey: "nav.profile", icon: "settings" },
@@ -104,6 +106,7 @@ export default function PatientApp({ me: initialMe }) {
     doctor: [t("nav.myDoctor"), t("sub.myDoctor")],
     queue: [t("nav.queue"), t("sub.queue")],
     analyses: [t("nav.analyses"), t("sub.analyses")],
+    meds: [t("meds.title"), t("meds.subtitle")],
     timeline: [t("timeline.title"), t("sub.timeline")],
     chat: [t("nav.chat"), t("sub.chatPatient")],
     profile: [t("nav.profile"), t("sub.profile")],
@@ -293,6 +296,8 @@ export default function PatientApp({ me: initialMe }) {
       )}
 
       {page === "analyses" && <AnalysesView list={analyses} onOpen={setModal} i18n={i18n} />}
+
+      {page === "meds" && <MedsSection i18n={i18n} />}
 
       {page === "timeline" && (
         <>

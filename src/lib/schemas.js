@@ -166,7 +166,18 @@ export const aiRequestSchema = z.object({
   bp: z.string().trim().max(20).optional(),
   pulse: z.union([z.string(), z.number()]).optional(),
   temp: z.union([z.string(), z.number()]).optional(),
+  spo2: z.union([z.string(), z.number()]).optional(),
   extra: z.string().trim().max(3000).optional(),
+});
+
+/* ---------------- DORI ESLATMASI (TIME PILL) ---------------- */
+export const reminderSchema = z.object({
+  patientId: objectId,
+  name: trimmed(1, 120, "Dori nomini yozing"),
+  dose: z.string().trim().max(80).optional(),
+  times: z.array(hhmm).min(1, "Kamida bitta vaqt").max(6),
+  startDate: z.string().trim().max(40).optional(),
+  endDate: z.string().trim().max(40).optional(),
 });
 
 export const createConversationSchema = z.object({ doctorId: objectId });
@@ -204,6 +215,7 @@ export const encounterSchema = z.object({
       bp: z.string().trim().max(20).optional(),
       pulse: z.string().trim().max(10).optional(),
       temp: z.string().trim().max(10).optional(),
+      spo2: z.string().trim().max(10).optional(),
       weight: z.string().trim().max(10).optional(),
     })
     .optional(),

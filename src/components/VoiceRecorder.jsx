@@ -68,12 +68,28 @@ export default function VoiceRecorder({ onRecorded, disabled }) {
     if (!navigator.mediaDevices?.getUserMedia || typeof window.MediaRecorder === "undefined")
       return toast(t("toast.micUnsupported"), "", "warn");
 
+    // Xavfsiz kontekst (HTTPS yoki localhost) bo'lmasa brauzer mikrofonni
+    // umuman bermaydi — telefonda http://192.168… orqali ochilganda shu bo'ladi
+    if (window.isSecureContext === false) {
+      return toast(t("toast.micInsecure"), t("toast.micInsecureSub"), "warn");
+    }
+
     let stream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch {
-      // Ruxsat berilmadi yoki mikrofon band
-      return toast(t("toast.micDenied"), t("toast.micDeniedSub"), "error");
+    } catch (err) {
+      // Xatoning turini ajratamiz — "ruxsat yo'q" degani har doim ham to'g'ri emas
+      const name = err?.name || "";
+      if (name === "NotAllowedError" || name === "SecurityError") {
+        return toast(t("toast.micDenied"), t("toast.micDeniedSub"), "error");
+      }
+      if (name === "NotFoundError" || name === "OverconstrainedError") {
+        return toast(t("toast.micNotFound"), t("toast.micNotFoundSub"), "error");
+      }
+      if (name === "NotReadableError" || name === "AbortError") {
+        return toast(t("toast.micBusy"), t("toast.micBusySub"), "error");
+      }
+      return toast(t("toast.micDenied"), `${t("toast.micDeniedSub")} (${name || "xato"})`, "error");
     }
 
     const mimeType = CANDIDATES.find((ty) => window.MediaRecorder.isTypeSupported?.(ty));

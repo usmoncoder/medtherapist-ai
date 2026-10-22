@@ -14,4 +14,5 @@ import "./AuditLog";
 import "./PasswordResetToken";
 import "./AiReport";
 import "./Encounter";
+import "./MedicationReminder";
 import "./ClientError";

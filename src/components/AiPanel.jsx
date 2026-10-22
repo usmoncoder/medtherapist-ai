@@ -4,12 +4,12 @@ import { BotFace, Empty, Icon } from "./ui";
 import { useI18n } from "@/lib/i18n";
 import { get, post } from "@/lib/api";
 import { getSymptoms } from "@/lib/reference";
-import { formatBp } from "@/lib/vitals";
+import { formatBp, formatTemp, formatSpo2 } from "@/lib/vitals";
 
 export default function AiPanel({ patients, toast, preselect, onUsed }) {
   const { t, lang, fdt } = useI18n();
   const [form, setForm] = useState({
-    patientId: "", complaint: "", bp: "", pulse: "", temp: "", extra: "",
+    patientId: "", complaint: "", bp: "", pulse: "", temp: "", spo2: "", extra: "",
   });
   const [symptoms, setSymptoms] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -145,6 +145,16 @@ export default function AiPanel({ patients, toast, preselect, onUsed }) {
               </div>
             </div>
             <div className="field">
+              <label>{t("ai.spo2")}</label>
+              <input
+                value={form.spo2}
+                onChange={(e) => setForm((f) => ({ ...f, spo2: formatSpo2(e.target.value) }))}
+                inputMode="numeric"
+                autoComplete="off"
+                placeholder="98"
+              />
+            </div>
+            <div className="field">
               <label>{t("ai.bp")}</label>
               <input
                 value={form.bp}
@@ -160,7 +170,12 @@ export default function AiPanel({ patients, toast, preselect, onUsed }) {
             </div>
             <div className="field">
               <label>{t("ai.temp")}</label>
-              <input value={form.temp} onChange={set("temp")} inputMode="decimal" placeholder="36.6" />
+              <input
+                value={form.temp}
+                onChange={(e) => setForm((f) => ({ ...f, temp: formatTemp(e.target.value) }))}
+                inputMode="decimal"
+                placeholder="36.6"
+              />
             </div>
             <div className="field full">
               <label>{t("ai.extra")}</label>
@@ -220,10 +235,45 @@ export default function AiPanel({ patients, toast, preselect, onUsed }) {
   );
 }
 
+const RISK = {
+  green: { color: "var(--green)", soft: "var(--green-soft)", dot: "🟢", key: "ai.riskGreen" },
+  yellow: { color: "var(--amber)", soft: "var(--amber-soft)", dot: "🟡", key: "ai.riskYellow" },
+  red: { color: "var(--red)", soft: "var(--red-soft)", dot: "🔴", key: "ai.riskRed" },
+};
+
 function AiResult({ result, t }) {
+  const risk = RISK[result.riskLevel] || RISK.green;
   return (
     <>
+      <div
+        className="radar-banner"
+        style={{
+          display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
+          borderRadius: 12, background: risk.soft, border: `1px solid ${risk.color}`,
+          marginBottom: 14,
+        }}
+      >
+        <span style={{ fontSize: 18 }}>{risk.dot}</span>
+        <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <strong style={{ color: risk.color, fontSize: 13 }}>
+            {t("ai.doctorRadar")}: {t(risk.key)}
+          </strong>
+          {result.riskReason && (
+            <small style={{ color: "var(--muted)" }}>{result.riskReason}</small>
+          )}
+        </span>
+      </div>
+
       <p className="body-text">{result.summary}</p>
+
+      {result.patientSummary && (
+        <>
+          <div className="sec-title">{t("ai.patientSummary")}</div>
+          <div className="result-card" style={{ borderColor: "var(--green)" }}>
+            <p className="body-text" style={{ margin: 0 }}>{result.patientSummary}</p>
+          </div>
+        </>
+      )}
 
       <div className="sec-title">{t("ai.differentials")}</div>
       <div className="result-card">

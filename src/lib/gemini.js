@@ -20,6 +20,9 @@ const RESPONSE_SCHEMA = {
   type: "object",
   properties: {
     summary: { type: "string" },
+    patientSummary: { type: "string" },
+    riskLevel: { type: "string", enum: ["green", "yellow", "red"] },
+    riskReason: { type: "string" },
     differentials: {
       type: "array",
       items: {
@@ -36,7 +39,7 @@ const RESPONSE_SCHEMA = {
     management: { type: "array", items: { type: "string" } },
     redFlags: { type: "array", items: { type: "string" } },
   },
-  required: ["summary", "differentials", "investigations", "management", "redFlags"],
+  required: ["summary", "patientSummary", "riskLevel", "riskReason", "differentials", "investigations", "management", "redFlags"],
 };
 
 const LANG_RULE = {
@@ -49,7 +52,10 @@ const systemPrompt = (lang) => `Sen tajribali terapevt shifokorga yordam beradig
 ${LANG_RULE[lang] || LANG_RULE.uz}
 
 Berilgan bemor ma'lumotlari asosida quyidagilarni qaytar:
-- summary: 2-3 gapda klinik xulosa
+- summary: 2-3 gapda klinik xulosa (shifokor uchun, tibbiy atamalar bilan)
+- patientSummary: xuddi shu xulosani BEMOR uchun oddiy, kundalik tilda, tibbiy atamalarsiz tushuntir. Masalan "gastroezofageal reflyuks" o'rniga "oshqozon kislotasi qizilo'ngachga qaytib chiqishi". 2-4 gap, tinchlantiruvchi va aniq.
+- riskLevel: bemor holatining shoshilinchlik darajasi — faqat "green" (normal, xavf yo'q), "yellow" (e'tibor va kuzatuv kerak) yoki "red" (shoshilinch baholash kerak)
+- riskReason: riskLevel nega shunday qo'yilgani — bir qisqa gap
 - differentials: 3-5 ta ehtimoliy tashxis; confidence 0-100 oralig'ida butun son; why - qisqa klinik asos
 - investigations: tavsiya etilgan tekshiruvlar ro'yxati
 - management: boshqaruv va davolash yo'nalishlari ro'yxati
@@ -59,7 +65,8 @@ Qoidalar:
 1. Aniq dori dozasini buyruq sifatida yozma - faqat yo'nalish ber.
 2. Ma'lumot yetishmasa, qanday qo'shimcha ma'lumot kerakligini investigations ichida ayt.
 3. Hech qachon yakuniy tashxis qo'yma - bu shifokorning vazifasi.
-4. Xavfli holat belgilari bo'lsa, ularni redFlags ga albatta kirit.`;
+4. Xavfli holat belgilari bo'lsa, ularni redFlags ga albatta kirit va riskLevel ni "red" qil.
+5. redFlags bo'sh bo'lsa-yu lekin kuzatuv kerak bo'lsa riskLevel "yellow", hammasi barqaror bo'lsa "green".`;
 
 export function geminiConfigured() {
   return Boolean(process.env.GEMINI_API_KEY);
@@ -76,7 +83,7 @@ function buildPrompt(input) {
     `Simptomlar: ${(input.symptoms || []).join(", ") || "—"}`,
     `Qon bosimi: ${input.bp || "—"}, Puls: ${input.pulse || "—"}, Tana harorati: ${
       input.temp ? `${input.temp} °C` : "—"
-    }`,
+    }, SpO₂ (kislorod to'yinganligi): ${input.spo2 ? `${input.spo2}%` : "—"}`,
     `Allergiya: ${input.allergies || "—"}`,
     `Surunkali kasalliklar: ${input.chronic || "—"}`,
     `Tibbiy tarix: ${input.history || "—"}`,
@@ -170,8 +177,12 @@ export async function analyzeCase(input, lang = "uz") {
 
 function normalize(parsed, model) {
   const arr = (v) => (Array.isArray(v) ? v.map(String).filter(Boolean).slice(0, 12) : []);
+  const risk = ["green", "yellow", "red"].includes(parsed.riskLevel) ? parsed.riskLevel : "green";
   return {
     summary: String(parsed.summary || ""),
+    patientSummary: String(parsed.patientSummary || ""),
+    riskLevel: risk,
+    riskReason: String(parsed.riskReason || ""),
     differentials: (parsed.differentials || []).slice(0, 6).map((d) => ({
       name: String(d.name || ""),
       confidence: Math.max(0, Math.min(100, Math.round(Number(d.confidence) || 0))),

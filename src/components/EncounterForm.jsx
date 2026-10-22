@@ -3,11 +3,11 @@ import { useState } from "react";
 import { Icon, useToast } from "@/components/ui";
 import { useI18n } from "@/lib/i18n";
 import { post } from "@/lib/api";
-import { formatBp } from "@/lib/vitals";
+import { formatBp, formatTemp, formatSpo2 } from "@/lib/vitals";
 
 const EMPTY = {
   subjective: "", objective: "", assessment: "", plan: "",
-  bp: "", pulse: "", temp: "", weight: "", followUpAt: "",
+  bp: "", pulse: "", temp: "", spo2: "", weight: "", followUpAt: "",
 };
 
 /** Shifokor qabul xulosasini (SOAP) yozadi */
@@ -33,7 +33,7 @@ export default function EncounterForm({ patientId, appointmentId, onSaved, onCan
       objective: form.objective,
       assessment: form.assessment,
       plan: form.plan,
-      vitals: { bp: form.bp, pulse: form.pulse, temp: form.temp, weight: form.weight },
+      vitals: { bp: form.bp, pulse: form.pulse, temp: form.temp, spo2: form.spo2, weight: form.weight },
       prescriptions: drugs.filter((d) => d.name?.trim()),
       followUpAt: form.followUpAt,
     });
@@ -63,15 +63,28 @@ export default function EncounterForm({ patientId, appointmentId, onSaved, onCan
           <label>{t("encounter.vitals")}</label>
           <div className="vitals-row">
             <input
+              value={form.spo2}
+              onChange={(e) => setForm((f) => ({ ...f, spo2: formatSpo2(e.target.value) }))}
+              inputMode="numeric"
+              placeholder={t("ai.spo2")}
+              aria-label={t("ai.spo2")}
+            />
+            <input
               value={form.bp}
               onChange={(e) => setForm((f) => ({ ...f, bp: formatBp(e.target.value) }))}
               inputMode="numeric"
               placeholder={t("ai.bp")}
               aria-label={t("ai.bp")}
             />
-            <input value={form.pulse} onChange={set("pulse")} placeholder={t("ai.pulse")} aria-label={t("ai.pulse")} />
-            <input value={form.temp} onChange={set("temp")} placeholder={t("encounter.temp")} aria-label={t("encounter.temp")} />
-            <input value={form.weight} onChange={set("weight")} placeholder={t("encounter.weight")} aria-label={t("encounter.weight")} />
+            <input value={form.pulse} onChange={set("pulse")} inputMode="numeric" placeholder={t("ai.pulse")} aria-label={t("ai.pulse")} />
+            <input
+              value={form.temp}
+              onChange={(e) => setForm((f) => ({ ...f, temp: formatTemp(e.target.value) }))}
+              inputMode="decimal"
+              placeholder={t("encounter.temp")}
+              aria-label={t("encounter.temp")}
+            />
+            <input value={form.weight} onChange={set("weight")} inputMode="decimal" placeholder={t("encounter.weight")} aria-label={t("encounter.weight")} />
           </div>
         </div>
 

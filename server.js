@@ -145,6 +145,74 @@ async function main() {
   reminderTimer.unref?.();
   setTimeout(sendReminders, 15_000); // ishga tushgach bir marta
 
+  /* ---------------- Dori ichish eslatmalari (time pill) ----------------
+     Har daqiqada faol eslatmalarni tekshiradi; belgilangan vaqt kelganda
+     (0–2 daqiqa oynasi) bemorga bir marta xabarnoma yuboradi. */
+  const MED_TZ = process.env.APP_TZ || "Asia/Tashkent";
+  const ymd = (date) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: MED_TZ, year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(new Date(date)); // YYYY-MM-DD
+
+  function localNow(now) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: MED_TZ, hour: "2-digit", minute: "2-digit", hour12: false,
+    }).formatToParts(now);
+    const hh = Number(parts.find((p) => p.type === "hour").value) % 24;
+    const mm = Number(parts.find((p) => p.type === "minute").value);
+    return { nowMin: hh * 60 + mm, dateStr: ymd(now) };
+  }
+
+  async function sendMedicationReminders() {
+    try {
+      const reminders = mongoose.connection.collection("medicationreminders");
+      const notifs = mongoose.connection.collection("notifications");
+      const now = new Date();
+      const { nowMin, dateStr } = localNow(now);
+
+      const list = await reminders.find({ active: true }).limit(500).toArray();
+      let sent = 0;
+
+      for (const r of list) {
+        if (r.startDate && ymd(r.startDate) > dateStr) continue;
+        if (r.endDate && ymd(r.endDate) < dateStr) continue;
+
+        const lastSent = r.lastSent || {};
+        for (const tStr of r.times || []) {
+          const [h, m] = String(tStr).split(":").map(Number);
+          if (Number.isNaN(h) || Number.isNaN(m)) continue;
+          const diff = nowMin - (h * 60 + m);
+          if (diff < 0 || diff >= 3) continue; // faqat vaqt kelgan payt
+          if (lastSent[tStr] === dateStr) continue; // bugun yuborilgan
+
+          const doc = {
+            user: r.patient,
+            type: "medication",
+            titleKey: "notif.medReminder",
+            vars: { name: r.name, dose: r.dose || "", time: tStr },
+            page: "meds",
+            tone: "amber",
+            read: false,
+            createdAt: new Date(),
+          };
+          const { insertedId } = await notifs.insertOne(doc);
+          await reminders.updateOne({ _id: r._id }, { $set: { [`lastSent.${tStr}`]: dateStr } });
+          io.to(`user:${r.patient.toString()}`).emit("notification:new", {
+            ...doc, id: insertedId.toString(), user: undefined,
+          });
+          sent += 1;
+        }
+      }
+      if (sent) console.log(`[dori] ${sent} ta dori eslatmasi yuborildi`);
+    } catch (e) {
+      console.error("[dori] xato:", e.message);
+    }
+  }
+
+  const medTimer = setInterval(sendMedicationReminders, 60_000);
+  medTimer.unref?.();
+  setTimeout(sendMedicationReminders, 20_000);
+
   server.listen(port, host, () =>
     console.log(`> Med AI: http://localhost:${port} (${dev ? "dev" : "production"})`)
   );
@@ -156,6 +224,7 @@ async function main() {
     closing = true;
     console.log(`\n[${signal}] to'xtatilmoqda…`);
     clearInterval(reminderTimer);
+    clearInterval(medTimer);
     io.close();
     server.close();
     await mongoose.disconnect().catch(() => {});

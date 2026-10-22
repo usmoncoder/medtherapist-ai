@@ -292,6 +292,8 @@ export function PatientCard({ data, onClose, onAi, onReload, toast, i18n }) {
         ))
       )}
 
+      <RemindersBlock pid={p.id} toast={toast} i18n={i18n} />
+
       <div className="sec-title" style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <span style={{ flex: 1 }}>{t("nav.analyses")}</span>
         <button className="ghost-btn outline" onClick={() => setAdding((v) => !v)}>
@@ -352,6 +354,147 @@ export function PatientCard({ data, onClose, onAi, onReload, toast, i18n }) {
         ))
       )}
     </Modal>
+  );
+}
+
+/* ---------------- DORI ESLATMALARI (TIME PILL) ---------------- */
+function RemindersBlock({ pid, toast, i18n }) {
+  const { t, fd } = i18n;
+  const [list, setList] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ name: "", dose: "", startDate: "", endDate: "" });
+  const [times, setTimes] = useState(["08:00"]);
+  const [busy, setBusy] = useState(false);
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  function load() {
+    get(`/api/reminders?patient=${pid}`).then((r) => {
+      if (r.ok) setList(r.data.reminders || []);
+    });
+  }
+  useEffect(() => {
+    if (pid) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pid]);
+
+  async function add() {
+    if (!form.name.trim()) return toast(t("toast.failed"), t("meds.needName"), "warn");
+    const clean = [...new Set(times.filter(Boolean))].sort();
+    if (!clean.length) return toast(t("toast.failed"), t("meds.needTime"), "warn");
+    setBusy(true);
+    const res = await post("/api/reminders", {
+      patientId: pid,
+      name: form.name,
+      dose: form.dose,
+      times: clean,
+      startDate: form.startDate || undefined,
+      endDate: form.endDate || undefined,
+    });
+    setBusy(false);
+    if (!res.ok) return toast(t("toast.notSaved"), res.error?.detail || t(`err.${res.error.code}`), "error");
+    toast(t("meds.added"), form.name);
+    setForm({ name: "", dose: "", startDate: "", endDate: "" });
+    setTimes(["08:00"]);
+    setOpen(false);
+    load();
+  }
+
+  async function remove(id) {
+    const res = await del(`/api/reminders/${id}`);
+    if (!res.ok) return toast(t("toast.failed"), "", "error");
+    toast(t("meds.deleted"), "", "info");
+    load();
+  }
+
+  return (
+    <>
+      <div className="sec-title" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ flex: 1 }}>{t("meds.doctorTitle")}</span>
+        <button className="ghost-btn outline" onClick={() => setOpen((v) => !v)}>
+          {open ? t("common.cancel") : `+ ${t("meds.add")}`}
+        </button>
+      </div>
+
+      {open && (
+        <div className="result-card" style={{ marginBottom: 12 }}>
+          <div className="form-grid">
+            <div className="field">
+              <label>{t("encounter.drugName")} <span>*</span></label>
+              <input value={form.name} onChange={set("name")} placeholder="Amoksitsillin" />
+            </div>
+            <div className="field">
+              <label>{t("encounter.dose")}</label>
+              <input value={form.dose} onChange={set("dose")} placeholder="500 mg" />
+            </div>
+            <div className="field full">
+              <label>{t("meds.times")}</label>
+              <div className="rx-row" style={{ flexWrap: "wrap", gap: 8 }}>
+                {times.map((tm, i) => (
+                  <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    <input
+                      type="time"
+                      value={tm}
+                      onChange={(e) =>
+                        setTimes((arr) => arr.map((x, j) => (j === i ? e.target.value : x)))
+                      }
+                      style={{ width: "auto" }}
+                    />
+                    {times.length > 1 && (
+                      <button className="mini-btn red" onClick={() => setTimes((arr) => arr.filter((_, j) => j !== i))}>
+                        <Icon name="close" strokeWidth="2.4" style={{ width: 13, height: 13 }} />
+                      </button>
+                    )}
+                  </span>
+                ))}
+                {times.length < 6 && (
+                  <button className="ghost-btn outline" onClick={() => setTimes((arr) => [...arr, "12:00"])}>
+                    + {t("meds.addTime")}
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="field">
+              <label>{t("meds.start")}</label>
+              <input type="date" value={form.startDate} onChange={set("startDate")} />
+            </div>
+            <div className="field">
+              <label>{t("meds.end")}</label>
+              <input type="date" value={form.endDate} onChange={set("endDate")} />
+            </div>
+          </div>
+          <button className="primary-btn full" onClick={add} disabled={busy}>
+            {busy ? t("common.saving") : t("common.add")}
+          </button>
+        </div>
+      )}
+
+      {list.length === 0 ? (
+        <p className="body-text">{t("meds.none")}</p>
+      ) : (
+        list.map((r) => (
+          <div className="result-card" key={r.id}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <Icon name="pill" />
+              <strong style={{ fontSize: 13.5 }}>{r.name}</strong>
+              {r.dose && <span className="badge purple">{r.dose}</span>}
+              <span style={{ display: "flex", gap: 6, flexWrap: "wrap", flex: 1 }}>
+                {r.times.map((tm) => (
+                  <span className="badge amber" key={tm}>{tm}</span>
+                ))}
+              </span>
+              <button className="mini-btn red" onClick={() => remove(r.id)}>
+                <Icon name="trash" style={{ width: 14, height: 14 }} />
+              </button>
+            </div>
+            {(r.startDate || r.endDate) && (
+              <p style={{ fontSize: 12.3, color: "var(--muted)", marginTop: 6 }}>
+                {r.startDate ? fd(r.startDate) : "…"} — {r.endDate ? fd(r.endDate) : t("meds.ongoing")}
+              </p>
+            )}
+          </div>
+        ))
+      )}
+    </>
   );
 }
 
