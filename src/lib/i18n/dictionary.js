@@ -21,7 +21,7 @@ export const DICT = {
   /* ============================ UZ — LOTIN ============================ */
   uz: {
     "app.name": "Med AI",
-    "app.tagline": "Raqamli klinika",
+    "app.tagline": "Dr. Fazilovna",
     "app.promo": "Sog'liqni\nraqamli\nboshqaring",
     "app.version": "Versiya 1.0.0",
     "app.rights": "Barcha huquqlar himoyalangan",
@@ -413,7 +413,7 @@ export const DICT = {
   /* ============================ UZ — KIRILL ============================ */
   uzc: {
     "app.name": "Med AI",
-    "app.tagline": "Рақамли клиника",
+    "app.tagline": "Dr. Fazilovna",
     "app.promo": "Соғлиқни\nрақамли\nбошқаринг",
     "app.version": "Версия 1.0.0",
     "app.rights": "Барча ҳуқуқлар ҳимояланган",
@@ -805,7 +805,7 @@ export const DICT = {
   /* ============================== RUSCHA ============================== */
   ru: {
     "app.name": "Med AI",
-    "app.tagline": "Цифровая клиника",
+    "app.tagline": "Dr. Fazilovna",
     "app.promo": "Управляйте\nздоровьем\nцифрово",
     "app.version": "Версия 1.0.0",
     "app.rights": "Все права защищены",
